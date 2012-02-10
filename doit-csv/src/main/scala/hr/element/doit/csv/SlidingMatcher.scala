@@ -1,36 +1,37 @@
 package hr.element.doit.csv
 
+
+
 object SlidingMatcher {
   type MatcherResult = Either[Unit, Option[Char]]
 
-  def apply(delimiter: Char): SlidingMatcher =
+ /* def apply(delimiter: Char): SlidingMatcher =
     apply(Array(delimiter))
 
   def apply(delimiter: String): SlidingMatcher =
-    apply(delimiter.toCharArray)
+    apply(delimiter.toCharArray)*/
 
-  def apply(delimiter: Array[Char]): SlidingMatcher =
+  def apply(qoute: Array[Char], delimiter: Array[Char], newLine: Array[Char]): SlidingMatcher =
     delimiter.length match {
       case 1 =>
         new SingleCharacterMatcher(delimiter.head)
       case 2 =>
         new TwoCharacterMatcher(delimiter(0), delimiter(1))
       case x if x > 2 =>
-        new CyclicCharacterMatcher(delimiter)
+        new CyclicCharacterMatcher(qoute, delimiter, newLine)
       case _ =>
         sys.error("Invalid delimiter length!")
     }
 }
 
 import SlidingMatcher._
-
 trait SlidingMatcher {
-  def consume(read: Char): Smr
+  def consume(read: Char, qoutedMode: Boolean): Smr
   def flush(): Array[Char]
 }
 
 class SingleCharacterMatcher(delimiter: Char) extends SlidingMatcher {
-  def consume(read: Char) =
+  def consume(read: Char, qoutedMode: Boolean) =
     if (delimiter == read) {
       Delimiter
     } else {
@@ -41,9 +42,9 @@ class SingleCharacterMatcher(delimiter: Char) extends SlidingMatcher {
 
 }
 
-class TwoCharacterMatcher(head: Char, tail: Char) extends SlidingMatcher {
+/*class TwoCharacterMatcher(head: Char, tail: Char) extends SlidingMatcher {
   var last: Option[Char] = None
-  def consume(read: Char) =
+  def consume(read: Char, qoutedMode: Boolean) =
     last match {
       case None =>
         last = Some(read)
@@ -63,42 +64,113 @@ class TwoCharacterMatcher(head: Char, tail: Char) extends SlidingMatcher {
   def flush(): Array[Char] =
     last.toArray
 
-}
+}*/
 
-class CyclicCharacterMatcher(delimiter: Array[Char]) extends SlidingMatcher {
-  val last: Array[Char] = delimiter.clone()
-  last(0) = last(0) + 1 toChar
+import scala.annotation.tailrec
+
+class CyclicCharacterMatcher(
+                      quote:      Array[Char],
+                      delimiter:  Array[Char],
+                      newLine:    Array[Char])
+                      extends SlidingMatcher {
+  val last: Array[Char] =
+    Vector(
+        quote,
+        delimiter,
+        newLine).maxBy(x => x.length).
+      clone()
   var cooldown = 0
-  //val cyclic = delimiter.indices.map(i => rot(delimiter, i))
-  val cyclic =
-    for(i <- delimiter.indices) yield {
-      delimiter.drop(i) ++ delimiter.take(i)
-    }
 
-  /* def rot(x: Array[Char], shift: Int): Array[Char] =
-      last.slice(shift, delimiter.length) ++ last.slice(0, shift)*/
+  trait Revolver {
+    val matchMsg: Smr
+    def is: Boolean
+    val length : Int
+  }
 
-  def consume(read: Char) = {
+  class QuoteRevolver extends Revolver {
+    val qouteRevolver =
+      for(i <- quote.indices)
+        yield {
+          quote.drop(i) ++ quote.take(i)
+        }
+    val matchMsg = Quote
+    def is = false
+    val length = quote.length
+  }
+  class DelimiterRevolver extends Revolver {
+    val delimiterRevolver =
+      for(i <- delimiter.indices)
+        yield {
+          delimiter.drop(i) ++ delimiter.take(i)
+          }
+    val matchMsg = Delimiter
+    def is = true
+    val length = delimiter.length
+  }
+  class NewLineRevolver extends Revolver {
+    val newLineRevolver =
+      for(i <- delimiter.indices)
+        yield {
+          newLine.drop(i) ++ newLine.take(i)
+        }
+    val matchMsg = NewLine
+    def is = true
+    val length = newLine.length
+  }
+  val nl = new NewLineRevolver()
+  val qr = new QuoteRevolver()
+  val dr = new DelimiterRevolver()
+  val rH = Array[Revolver](nl, qr, dr)  //sort ascending
 
-    val readWritePoint = cooldown % delimiter.length
+
+  def consume(read: Char, quotedMode: Boolean)= {
+    //  should return error if buffer is not empty after special cases
     cooldown += 1
-    if (cooldown < delimiter.length) {
+    //@tailrec
+    if (quotedMode) {           // quotes mode uses only first qoute.length of buffer
+      val readWritePoint = (cooldown - 1) % quotes.length
+      if (cooldown < quote.length){
+        last(readWritePoint) = read
+        Cooldown
+      } else {      //  quotes mode  cooldown > qoutes length
+        if (ql.is) {  // qoutes
+          cooldown -= quotes.length
+          Quote
+        }
+        else {    //    no quotes, no cooldown return char
+          val ret= last((readWritePoint + 1) % quotes.length)
+          last(readWritepoint) = read
+          Ch3(ret)
+        }
+      }                   //   end of quotesmode
+    }
+    else {
+      val readWritePoint = (cooldown - 1) % quotes.length
       last(readWritePoint) = read
-      Cooldown
-    } else {
-      val res = last((readWritePoint + 1) % delimiter.length)
-      last(readWritePoint) = read;
-      if (last sameElements
-        cyclic((delimiter.length - readWritePoint) % delimiter.length)) {
-        cooldown = 0;
-        Delimiter
-      } else {
-        Ch3(res)
+      if (rH(0).is){
+          rH(0).matchMsg
+      }
+      else {
+        if (rH(1).is){
+          rH(1).matchMsg
+        }
+        else {
+          if(rH(2).is) {
+            rH(2).matchMsg
+          }
+          else {
+            if(last.length < cooldown) {
+              Cooldown
+            }
+            else {
+              Ch3(last((readWritePoint + 1) % quotes.length))
+            }
+          }
+        }
       }
     }
   }
-
-  def flush(): Array[Char] =
+  def flush(): Array[Char] = {
     if (cooldown < delimiter.length) {
       last.take(cooldown)
     } else {
@@ -106,6 +178,23 @@ class CyclicCharacterMatcher(delimiter: Array[Char]) extends SlidingMatcher {
       cooldown = 0;
       last.takeRight(delimiter.length - readWritePoint) ++ last.take(readWritePoint)
     }
-
-  def currMap: Array[Char] = cyclic(cooldown % delimiter.length)
+  }
 }
+
+
+
+
+//    if (cooldown < delimiter.length) {
+//      last(readWritePoint) = read
+//      Cooldown
+//    } else {
+//      val res = last((readWritePoint + 1) % delimiter.length)
+//      last(readWritePoint) = read;
+//      if (last sameElements
+//        cyclic((delimiter.length - readWritePoint) % delimiter.length)) {
+//        cooldown = 0;
+//        Delimiter
+//      } else {
+//        Ch3(res)
+//      }
+//    }
