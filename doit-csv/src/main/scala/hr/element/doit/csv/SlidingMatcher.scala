@@ -11,32 +11,54 @@ object SlidingMatcher {
   def apply(delimiter: String): SlidingMatcher =
     apply(delimiter.toCharArray)*/
 
-  def apply(qoute: Array[Char], delimiter: Array[Char], newLine: Array[Char]): SlidingMatcher =
-    delimiter.length match {
+//  def apply(qoute: Array[Char], delimiter: Array[Char], newLine: Array[Char]): SlidingMatcher =
+//    Array(config.quote, config.newLine, config.deimiter) match {
+//      case 1 =>
+//        new SingleCharacterMatcher(delimiter.head)
+//     // case 2 =>        new TwoCharacterMatcher(delimiter(0), delimiter(1))
+//      case x if x > 2 =>
+//        new CyclicCharacterMatcher(qoute, delimiter, newLine)
+//      case _ =>
+//        sys.error("Invalid delimiter length!")
+//    }
+    def apply(config: CSVFactory): SlidingMatcher =
+    Array(config.quotes, config.newLine, config.delimiter).maxBy(_.length).length
+        match {
       case 1 =>
-        new SingleCharacterMatcher(delimiter.head)
-      case 2 =>
-        new TwoCharacterMatcher(delimiter(0), delimiter(1))
+        new SingleCharacterMatcher(
+            config.quotes.toCharArray,
+            config.delimiter.toCharArray,
+            config.newLine.toCharArray)
+     // case 2 =>        new TwoCharacterMatcher(delimiter(0), delimiter(1))
       case x if x > 2 =>
-        new CyclicCharacterMatcher(qoute, delimiter, newLine)
+        new CyclicCharacterMatcher(
+            config.quotes.toCharArray,
+            config.delimiter.toCharArray,
+            config.newLine.toCharArray)
       case _ =>
         sys.error("Invalid delimiter length!")
     }
 }
 
 import SlidingMatcher._
+import LineReader._
 trait SlidingMatcher {
-  def consume(read: Char, qoutedMode: Boolean): Smr
+  def consume(read: Char, mode: SmrMode): Smr
   def flush(): Array[Char]
 }
 
-class SingleCharacterMatcher(delimiter: Char) extends SlidingMatcher {
+class SingleCharacterMatcher(
+                      quote:      Array[Char],
+                      delimiter:  Array[Char],
+                      newLine:    Array[Char])
+                      extends SlidingMatcher {
   def consume(read: Char, qoutedMode: Boolean) =
-    if (delimiter == read) {
-      Delimiter
-    } else {
-      Ch3(read)
-    }
+    read match {
+    case quote => Quote
+    case delimiter => Delimiter
+    case newLine => NewLine
+    case x => Ch3(x)
+  }
   def flush(): Array[Char] =
     Array.empty
 
@@ -75,13 +97,9 @@ class CyclicCharacterMatcher(
                       extends SlidingMatcher {
 
   var cooldown = 0
-//
-//  trait Revolver {
-//    val matchMsg: Smr
-//    def is: Boolean
-//    val length : Int
-//  }
-  class Revolver(matchMsg: Smr) {
+
+  class Revolver(ma: Smr) {
+    val matchMsg = ma
     val refArray = matchMsg match {
       case Delimiter  => delimiter
       case NewLine    => newLine
@@ -96,97 +114,35 @@ class CyclicCharacterMatcher(
     def isAt(readPoint: Int) = {
       last sameElements
          revolver((length - readPoint) % length)  //todo
-      
     }
   }
-  
-//
-//  class QuoteRevolver extends Revolver {
-//    val qouteRevolver =
-//      for(i <- quote.indices)
-//        yield {
-//          quote.drop(i) ++ quote.take(i)
-//        }
-//    val matchMsg = Quote
-//    def is = false
-//    val length = quote.length
-//  }
-//  class DelimiterRevolver extends Revolver {
-//    val delimiterRevolver =
-//      for(i <- delimiter.indices)
-//        yield {
-//          delimiter.drop(i) ++ delimiter.take(i)
-//          }
-//    val matchMsg = Delimiter
-//    def is = true
-//    val length = delimiter.length
-//  }
-//  class NewLineRevolver extends Revolver {
-//    val newLineRevolver =
-//      for(i <- delimiter.indices)
-//        yield {
-//          newLine.drop(i) ++ newLine.take(i)
-//        }
-//    val matchMsg = NewLine
-//    def is = true
-//    val length = newLine.length
-//  }
-  val nl = new Revolver(NewLine)
-  val qr = new Revolver(Quote)
-  val dr = new Revolver(Delimiter)
-  val rH = Array[Revolver](nl, qr, dr)  //sort ascending
+
+  val rH = Array[Revolver](
+      new Revolver(NewLine),
+      new Revolver(Quote),
+      new Revolver(Delimiter))  //sort ascending
 
   val last: Array[Char] =
     rH.maxBy(x => x.length).refArray.
       clone()
 
-  def consume(read: Char, quotedMode: Boolean)= {
-    //  should return error if buffer is not empty after special cases
+      // ()
+  def consume(read: Char, mode: ( Smr => ModeCase ) )= {    //  should return error if buffer is not empty after special cases
+    val modedMatchers = rH.filter(x => mode(x.matchMsg) != Ignore)
+    val bufflength = modedMatchers.maxBy(_.length).length
+    val readPoint = cooldown % bufflength
     cooldown += 1
-    //@tailrec
-    if (quotedMode) {           // quotes mode uses only first qoute.length of buffer
-      val readWritePoint = (cooldown - 1) % quote.length
-      if (cooldown < quote.length){
-        last(readWritePoint) = read
-        Cooldown
-      } else {      //  quotes mode  cooldown > qoutes length
-        if (qr.is) {  // qoutes
-          cooldown -= quote.length
-          Quote
-        }
-        else {    //    no quotes, no cooldown return char
-          val ret= last((readWritePoint + 1) % quote.length)
-          last(readWritepoint) = read
-          Ch3(ret)
-        }
-      }                   //   end of quotesmode
-    }
-    else {
-      val readWritePoint = (cooldown - 1) % quote.length
-      last(readWritePoint) = read
-      if (rH(0).is){
-          rH(0).matchMsg
-      }
-      else {
-        if (rH(1).is){
-          rH(1).matchMsg
-        }
-        else {
-          if(rH(2).is) {
-            rH(2).matchMsg
-          }
-          else {
-            if(last.length < cooldown) {
-              Cooldown
-            }
-            else {
-              Ch3(last((readWritePoint + 1) % quotes.length))
-            }
-          }
-        }
-      }
+    val writePoint = cooldown % bufflength
+    last(writePoint) = read
+
+    val result = modedMatchers.find(_.isAt(readPoint))
+    result match {
+      case Some(x) => x.matchMsg
+      case None => if (cooldown < bufflength) Cooldown
+      else Ch3(last(readPoint))
     }
   }
+
   def flush(): Array[Char] = {
     if (cooldown < delimiter.length) {
       last.take(cooldown)
@@ -199,6 +155,50 @@ class CyclicCharacterMatcher(
 }
 
 
+//    //@tailrec
+//    if (quotedMode) {           // quotes mode uses only first qoute.length of buffer
+//      val readWritePoint = (cooldown - 1) % quote.length
+//      if (cooldown < quote.length){
+//        last(readWritePoint) = read
+//        Cooldown
+//      } else {      //  quotes mode  cooldown > qoutes length
+//        if (qr.is) {  // qoutes
+//          cooldown -= quote.length
+//          Quote
+//        }
+//        else {    //    no quotes, no cooldown return char
+//          val ret= last((readWritePoint + 1) % quote.length)
+//          last(readWritepoint) = read
+//          Ch3(ret)
+//        }
+//      }                   //   end of quotesmode
+//    }
+//    else {
+//      val readWritePoint = (cooldown - 1) % quote.length
+//      last(readWritePoint) = read
+//      if (rH(0).is){
+//          rH(0).matchMsg
+//      }
+//      else {
+//        if (rH(1).is){
+//          rH(1).matchMsg
+//        }
+//        else {
+//          if(rH(2).is) {
+//            rH(2).matchMsg
+//          }
+//          else {
+//            if(last.length < cooldown) {
+//              Cooldown
+//            }
+//            else {
+//              Ch3(last((readWritePoint + 1) % quotes.length))
+//            }
+//          }
+//        }
+//      }
+//    }
+//  }
 
 
 //    if (cooldown < delimiter.length) {
