@@ -73,79 +73,96 @@ class CyclicCharacterMatcher(
                       delimiter:  Array[Char],
                       newLine:    Array[Char])
                       extends SlidingMatcher {
-  val last: Array[Char] =
-    Vector(
-        quote,
-        delimiter,
-        newLine).maxBy(x => x.length).
-      clone()
+
   var cooldown = 0
-
-  trait Revolver {
-    val matchMsg: Smr
-    def is: Boolean
-    val length : Int
-  }
-
-  class QuoteRevolver extends Revolver {
-    val qouteRevolver =
+//
+//  trait Revolver {
+//    val matchMsg: Smr
+//    def is: Boolean
+//    val length : Int
+//  }
+  class Revolver(matchMsg: Smr) {
+    val refArray = matchMsg match {
+      case Delimiter  => delimiter
+      case NewLine    => newLine
+      case Quote      => quote
+    }
+    val length = refArray.length
+    val revolver =
       for(i <- quote.indices)
         yield {
-          quote.drop(i) ++ quote.take(i)
+          refArray.drop(i) ++ refArray.take(i)
         }
-    val matchMsg = Quote
-    def is = false
-    val length = quote.length
+    def isAt(readPoint: Int) = {
+      last sameElements
+         revolver((length - readPoint) % length)  //todo
+      
+    }
   }
-  class DelimiterRevolver extends Revolver {
-    val delimiterRevolver =
-      for(i <- delimiter.indices)
-        yield {
-          delimiter.drop(i) ++ delimiter.take(i)
-          }
-    val matchMsg = Delimiter
-    def is = true
-    val length = delimiter.length
-  }
-  class NewLineRevolver extends Revolver {
-    val newLineRevolver =
-      for(i <- delimiter.indices)
-        yield {
-          newLine.drop(i) ++ newLine.take(i)
-        }
-    val matchMsg = NewLine
-    def is = true
-    val length = newLine.length
-  }
-  val nl = new NewLineRevolver()
-  val qr = new QuoteRevolver()
-  val dr = new DelimiterRevolver()
+  
+//
+//  class QuoteRevolver extends Revolver {
+//    val qouteRevolver =
+//      for(i <- quote.indices)
+//        yield {
+//          quote.drop(i) ++ quote.take(i)
+//        }
+//    val matchMsg = Quote
+//    def is = false
+//    val length = quote.length
+//  }
+//  class DelimiterRevolver extends Revolver {
+//    val delimiterRevolver =
+//      for(i <- delimiter.indices)
+//        yield {
+//          delimiter.drop(i) ++ delimiter.take(i)
+//          }
+//    val matchMsg = Delimiter
+//    def is = true
+//    val length = delimiter.length
+//  }
+//  class NewLineRevolver extends Revolver {
+//    val newLineRevolver =
+//      for(i <- delimiter.indices)
+//        yield {
+//          newLine.drop(i) ++ newLine.take(i)
+//        }
+//    val matchMsg = NewLine
+//    def is = true
+//    val length = newLine.length
+//  }
+  val nl = new Revolver(NewLine)
+  val qr = new Revolver(Quote)
+  val dr = new Revolver(Delimiter)
   val rH = Array[Revolver](nl, qr, dr)  //sort ascending
 
+  val last: Array[Char] =
+    rH.maxBy(x => x.length).refArray.
+      clone()
 
   def consume(read: Char, quotedMode: Boolean)= {
     //  should return error if buffer is not empty after special cases
     cooldown += 1
     //@tailrec
     if (quotedMode) {           // quotes mode uses only first qoute.length of buffer
-      val readWritePoint = (cooldown - 1) % quotes.length
+      val readWritePoint = (cooldown - 1) % quote.length
       if (cooldown < quote.length){
         last(readWritePoint) = read
         Cooldown
       } else {      //  quotes mode  cooldown > qoutes length
-        if (ql.is) {  // qoutes
-          cooldown -= quotes.length
+        if (qr.is) {  // qoutes
+          cooldown -= quote.length
           Quote
         }
         else {    //    no quotes, no cooldown return char
-          val ret= last((readWritePoint + 1) % quotes.length)
+          val ret= last((readWritePoint + 1) % quote.length)
           last(readWritepoint) = read
           Ch3(ret)
         }
       }                   //   end of quotesmode
     }
     else {
-      val readWritePoint = (cooldown - 1) % quotes.length
+      val readWritePoint = (cooldown - 1) % quote.length
       last(readWritePoint) = read
       if (rH(0).is){
           rH(0).matchMsg
