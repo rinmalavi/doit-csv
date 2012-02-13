@@ -21,20 +21,22 @@ class LineReader(config: CSVFactory, reader: Reader) extends Traversable[String]
 
 
 
+
   val sliM = SlidingMatcher(config)
 
-  val startMode: SmrMode = (_: Smr) => Watch
+  val StartMode: SmrMode = (_: Smr) => Watch
 
 
-  val vebroseMode: SmrMode ={
+  val VerboseMode: SmrMode ={
     _ match {
       case Delimiter => Watch
       case Quote => Unexpected
       case NewLine => Watch
       case Ch3(x) => Watch
+      case _ => Unexpected
     }
   }
-  val escapeMode: SmrMode ={
+  val EscapeMode: SmrMode ={
       _ match {
         case Delimiter => Watch
         case Quote => Watch
@@ -43,34 +45,38 @@ class LineReader(config: CSVFactory, reader: Reader) extends Traversable[String]
         case _ => Unexpected
       }
   }
-  val quotedMode: SmrMode = {
+  val QuotedMode: SmrMode = {
     _ match {
       case Delimiter => Ignore
       case Quote => Watch
       case NewLine => Ignore
       case Ch3(x) => Watch
+      case _ => Unexpected
     }
   }
   val EndMode: SmrMode = (_: Smr) => Unexpected
 
   def conv(curMode: SmrMode, matcher: Smr): SmrMode = {
     (curMode, matcher) match {
-      case (startMode, Delimiter)   => startMode
-      case (escapeMode, Delimiter)  => startMode
-      case (vebroseMode, Delimiter) => startMode
-      case (quotedMode, Quote)      => escapeMode
-      case (escapeMode, Quote)      => quotedMode
+      case (StartMode, Delimiter)   => StartMode
+      case (StartMode, Quote)       => QuotedMode
+      case (StartMode, Ch3(_))      => VerboseMode
+      case (EscapeMode, Delimiter)  => StartMode
+      case (VerboseMode, Delimiter) => StartMode
+      case (QuotedMode, Quote)      => EscapeMode
+      case (EscapeMode, Quote)      => QuotedMode
+      case _                        => EndMode
     }
   }
 
-
-  val words: List[String] = {
-
-//    def flushAll(): Unit = {
-//      quoteM.flush()
-//      delimiterM.flush()
-//      newLineM.flush()
+//  def checkvalid(mode: SmrModet, smr: Smr){
+//    (mode, smr) match {
+//      case (StartMode, x) => startMode(x)
+//      case (VerboseMode, x) => verboseMode(x)
+//      case (QuotedMode,x)   => quotedMode(x)
 //    }
+//  }
+  val words: List[String] = {
 
     val res = new ArrayBuffer[String]
 
@@ -79,7 +85,7 @@ class LineReader(config: CSVFactory, reader: Reader) extends Traversable[String]
         curr: StringBuilder = new StringBuilder()) {
       val read = reader.read()
       if (read == -1){                                  // End Of File
-        if (mode == quotedMode) sys.error("Malformated CSV, unexpected eof!")
+        if (mode == QuotedMode) sys.error("Malformated CSV, unexpected eof!")
         else
           if (curr.nonEmpty)
               res += (curr ++= sliM.flush()).result
@@ -90,28 +96,28 @@ class LineReader(config: CSVFactory, reader: Reader) extends Traversable[String]
           if (mode(result) == Unexpected ) sys.error("Malformated CSV!")
           else {
             result match {
-              case Delimiter  =>
-                        curr.append(sliM.flush())
+              case Delimiter    =>
+                        curr.appendAll(sliM.flush())
                         res += curr.result
                         loop(conv(mode, Delimiter))
 
-              case Quote      =>
-                if (quotedMode == mode) loop(conv(mode, Quote), curr)
+              case Quote        =>
+                if (QuotedMode == mode) loop(conv(mode, Quote), curr)
                 else loop(conv(mode, Quote), curr append config.quotes)
 
-              case NewLine    =>
-                curr.append(sliM.flush())
+              case NewLine      =>
+                curr.appendAll(sliM.flush())
                 res += curr.result()
 
-              case Ch3(x)      =>
+              case Ch3(x)       =>
                 loop(conv(mode, result),  curr.append(x))
+              case Cooldown     => loop(conv(mode, result),  curr)
+              }
             }
           }
-
       }
-
-      }
-
+    loop(StartMode)
+    res.toList
     }
 
 
