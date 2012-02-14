@@ -75,7 +75,7 @@ class CyclicCharacterMatcher(
                       NewLineA:    Array[Char])
                       extends SlidingMatcher {
 
-  var cooldown = 0
+  var buffTake = 0
 
   class Revolver(ma: Smr) {
     val matchMsg = ma
@@ -86,20 +86,24 @@ class CyclicCharacterMatcher(
     }
     val length = refArray.length
     val revolver =
-      for(i <- QuoteA.indices)
+      for(i <- refArray.indices)
         yield {
           refArray.drop(i) ++ refArray.take(i)
         }
-    def isAt(readPoint: Int, buffLength: Int) = {
-      val head = readPoint
-      val tail = ( readPoint + length) % buffLength
-      val sub =
-        if ( head > tail )
-          last.drop(head) ++ last.take(tail)
-        else
-          last.drop(head).takeRight(length)
+    def isAt(readPoint: Int) = {
+      if ( buffTake < length) false
+      else{
+        val head = (readPoint + last.length - length + 1) % last.length  //(readPoint + (buffLength - length)) % buffLength
+        val tail = (readPoint) %  last.length
+        val sub =
+          if ( head > tail )
+            last.drop(head-1) ++ last.take(tail)
+            else
+                last.drop(head).take(length)
+         println("r:"+readPoint+"c"+buffTake+":"+ new String(sub) + ":" + new String(revolver((length + readPoint) % length)))
       sub sameElements
-         revolver((length - readPoint) % length)  //todo
+         revolver((length + readPoint) % length)  //todo
+      }
     }
   }
 
@@ -112,31 +116,60 @@ class CyclicCharacterMatcher(
     rH.maxBy(x => x.length).refArray.
       clone()
 
+   var writePoint = 0
       // ()
   def consume(read: Char, mode: ( Smr => ModeCase ) )= {    //  should return error if buffer is not empty after special cases
     val modedMatchers = rH.filter(x => mode(x.matchMsg) != Ignore)
     val bufflength = modedMatchers.maxBy(_.length).length
-    val readPoint = cooldown % bufflength
-    cooldown += 1
-    val writePoint = cooldown % bufflength
     last(writePoint) = read
 
-    val result = modedMatchers.find(_.isAt(readPoint, bufflength))
+    buffTake += 1
+    val result = modedMatchers.find(_.isAt(writePoint))
+    writePoint += 1
+    writePoint %= last.length
     result match {
-      case Some(x) => x.matchMsg
-      case None => if (cooldown < bufflength) Cooldown
-      else Ch3(last(readPoint))
+      case Some(x) =>
+          buffTake -= x.length
+          x.matchMsg
+      case None =>
+        if (buffTake < bufflength) {
+
+            Cooldown
+      }
+      else {
+        val readPoint = (writePoint + last.length - bufflength) % last.length
+        buffTake -=1
+        Ch3(last(readPoint))}
+
+
     }
   }
 
   def flush(): Array[Char] = {
-    if (cooldown < last.length) {
-      last.take(cooldown)
-    } else {
-      val readWritePoint = cooldown % last.length
-      cooldown = 0;
-      last.takeRight(last.length - readWritePoint) ++ last.take(readWritePoint)
-    }
+
+    val tail = (writePoint - 1+ last.length ) % last.length
+    val head = (tail - buffTake + last.length ) % last.length
+    println("f:" + buffTake+ " dif:"+ (tail-head))
+    buffTake = 0
+    writePoint = 0
+
+          if ( head > tail )
+            last.drop(head-1) ++ last.take(tail)
+            else
+                last.drop(head).take(tail - head)
+
+//
+//    if (buffTake < last.length) {
+//
+//      val readPoint = buffTake
+//      buffTake = 0
+//      last.take(readPoint)
+//    } else {
+//      println("f:"+buffTake)
+//      val readWritePoint = buffTake % last.length
+//      buffTake = 0;
+//      last.takeRight(last.length - readWritePoint) ++ last.take(readWritePoint)
+//    }
   }
 }
 

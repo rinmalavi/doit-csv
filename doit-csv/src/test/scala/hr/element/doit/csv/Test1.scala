@@ -39,7 +39,7 @@ class ExampleSuite extends GivenWhenThen
 
     while(it.hasNext()){
             println
-            println("t>")
+            println("TEST>")
       val lr = it.next()
          lr.foreach(x => print(">"+ x + "<"))
 

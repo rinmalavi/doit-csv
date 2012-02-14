@@ -2,12 +2,12 @@ package hr.element.doit.csv;
 
 
 
+import hr.element.doit.csv.*;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
 import java.util.Iterator;
-
 
 
 public class CSVReader implements Iterable<LineReader>, Iterator<LineReader> {
