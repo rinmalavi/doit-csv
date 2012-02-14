@@ -31,7 +31,7 @@ class ExampleSuite extends GivenWhenThen
     info("")
 
     val fileName = "/home/marin/doit/csvs/test1.csv"
-    val rder: CSVReader = CSVFactory.factory().setNewLine("sss").getReader(new FileInputStream(fileName));
+    val rder: CSVReader = CSVFactory.factory().setNewLine("sss").setDelimiter("1234").getReader(new FileInputStream(fileName));
 
 
 

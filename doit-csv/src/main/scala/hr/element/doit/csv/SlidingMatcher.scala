@@ -93,7 +93,7 @@ class CyclicCharacterMatcher(
     def isAt(readPoint: Int) = {
       if ( buffTake < length) false
       else{
-        val head = (readPoint + last.length - length + 1) % last.length  //(readPoint + (buffLength - length)) % buffLength
+        val head = (readPoint + last.length - length + 1) % last.length
         val tail = (readPoint) %  last.length
         val sub =
           if ( head > tail )
@@ -102,7 +102,7 @@ class CyclicCharacterMatcher(
                 last.drop(head).take(length)
          println("r:"+readPoint+"c"+buffTake+":"+ new String(sub) + ":" + new String(revolver((length + readPoint) % length)))
       sub sameElements
-         revolver((length + readPoint) % length)  //todo
+         revolver((length + readPoint + 1) % length)  //todo
       }
     }
   }
@@ -149,12 +149,12 @@ class CyclicCharacterMatcher(
 
     val tail = (writePoint - 1+ last.length ) % last.length
     val head = (tail - buffTake + last.length ) % last.length
-    println("f:" + buffTake+ " dif:"+ (tail-head))
+    //println("f:" + buffTake+ " dif:"+ (tail - head))
     buffTake = 0
     writePoint = 0
 
           if ( head > tail )
-            last.drop(head-1) ++ last.take(tail)
+            last.drop(head - 1).take(tail)
             else
                 last.drop(head).take(tail - head)
 
