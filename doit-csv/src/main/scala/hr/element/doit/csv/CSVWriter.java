@@ -14,6 +14,7 @@ public class CSVWriter {
   }
   public CSVWriter write(String[] line) throws IOException{
     int i = 0;
+    if (line == null) return this;
     while(true){
       final String van = getStringToWrite(line[i]);
       writer.write(van);
@@ -53,7 +54,7 @@ public class CSVWriter {
     int oldValueTailPivot = -1;
 
     while(true) {
-      final int oldValueHeadPivot = oldValueTailPivot < 0 ?  0 :oldValueTailPivot;
+      final int oldValueHeadPivot = oldValueTailPivot < 0 ?  0 : oldValueTailPivot;
 
       oldValueTailPivot = value.indexOf(config.quotes, oldValueTailPivot+1);
 

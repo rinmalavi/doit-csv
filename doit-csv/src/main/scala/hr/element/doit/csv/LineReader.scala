@@ -107,9 +107,9 @@ class LineReader(config: CSVFactory, reader: Reader) extends Traversable[String]
         curr: StringBuilder = new StringBuilder()) {
       val read = reader.read()
 
-      println
-      println( "loop: " + curr + " " + stringMode(mode)+" read :"+read.toChar)
-      res.foreach(x => println("res> "+ x ))
+      //println
+      //println( "loop: " + curr + " " + stringMode(mode)+" read :"+read.toChar)
+      //res.foreach(x => println("res> "+ x ))
 
       if (read == -1){                                  // End Of File
         if (mode == QuotedMode) sys.error("Malformated CSV, unexpected eof!")

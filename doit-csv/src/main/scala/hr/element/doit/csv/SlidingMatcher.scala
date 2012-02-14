@@ -90,14 +90,15 @@ class CyclicCharacterMatcher(
       else{
         val head = (readPoint + last.length - length + 1) % last.length
         val tail = (readPoint) %  last.length
+       // val revolverNo = if ( readPoint >= length) 0
+        //       else (length -(last.length -readPoint)+2) % length          //(math.min((readPoint+ length) % last.length, length)+1) % length
         val sub =
           if ( head > tail )
-            last.drop(head-1) ++ last.take(tail)
+            last.drop(head)++last.take(tail+1)
             else
                 last.drop(head).take(length)
-         //println("r:"+readPoint+"c"+buffTake+":"+ new String(sub) + ":" + new String(revolver((length + readPoint) % length)))
-      sub sameElements
-         revolver((length + readPoint + 1) % length)
+         //println("r:"+readPoint+"c"+buffTake+":"+ new String(sub) + ":" + new String(revolver(0)))
+      sub sameElements    revolver(0)
       }
     }
   }

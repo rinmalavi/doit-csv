@@ -2,6 +2,9 @@ package hr.element.doit.csv;
 
 
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.charset.Charset;
 
 public class CSVFactory {
@@ -55,12 +58,12 @@ public class CSVFactory {
   }
 
   // ----------------------------------------------------
-/*
+
   public CSVWriter getWriter(final OutputStream oS) {
     Writer w = new OutputStreamWriter(oS, encoding);
     return new CSVWriter(this, w);
   }
-*/
+
   // -----------------------------------------------------
   public CSVReader getReader(final InputStream iS) {
     return new CSVReader(this, iS);
