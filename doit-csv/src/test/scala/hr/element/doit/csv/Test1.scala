@@ -32,11 +32,19 @@ class ExampleSuite extends GivenWhenThen
 
   scenario("simple Test") {
     val outFileName = "/home/marin/doit/csvs/test1.csv"
-    for (i <- 517 to 517) {
+      val startCase = 517
+      val endCase   = 557
+      val rowMod  = (i: Int) => (i)
+      val colMod  = (i:Int )  =>(i / 60)
+      val strSize = 120
+      val numOfQuotes = (i:Int) => i/70
+
+
+    for (i <- startCase to endCase) {
       val delimiter = (i * 127).toString()
       val newLine = (i * 25).toString()
       val quotes = (i * 3).toString()
-      info("deli: " + delimiter + ", nL" + newLine + ", q " + quotes)
+      //info("deli: " + delimiter + ", nL" + newLine + ", q " + quotes)
       if (delimiter.contains(quotes) ||
         delimiter.contains(newLine) ||
         quotes.contains(newLine) ||
@@ -49,16 +57,17 @@ class ExampleSuite extends GivenWhenThen
           setNewLine(newLine).
           setQuotes(quotes)
 
-        /*val rand = new Random(i)
+        val rand = new Random(i)
         val writer = factory.getWriter(new FileOutputStream(outFileName))
-        for (j <- 1 to (i)) { // redovi
+        for (j <- 1 to rowMod(i)) { // redovi
+
 
           val str =
-            for (k <- 1 to i / 90) yield {
+            for (k <- 1 to colMod(i)) yield {
               val str = new StringBuilder(
-                rand.nextString(rand.nextInt().abs % 20 + 4))
+                rand.nextString(rand.nextInt().abs % strSize + 4))
               val l = str.length
-              for (l <- 1 to i / 170) {
+              for (l <- 1 to numOfQuotes(i)) {
                 str.insert((rand.nextInt().abs % l + 3), quotes)
               }
               str.result()
@@ -70,20 +79,20 @@ class ExampleSuite extends GivenWhenThen
 
         }
 
-        writer.close()*/info("Starting test :" + i)
+        writer.close()
         val time = System.currentTimeMillis()
         val r = new Random(i)
         val f = new File(outFileName)
-        info("File size: " + f.length())
+        info("Starting test :" + i+ "File size: " + f.length())
         val reader = factory.getReader(new FileInputStream(f))
         while (reader.hasNext()) {
           val lr = reader.next()
-          lr.foreach(
+          /*lr.foreach(
             x => {
               val str = new StringBuilder(
-                r.nextString(r.nextInt().abs % 20 + 4))
+                r.nextString(r.nextInt().abs % strSize + 4))
               val l = str.length
-              for (l <- 1 to i / 170) {
+              for (l <- 1 to numOfQuotes(i)) {
                 str.insert((r.nextInt().abs % l + 3), quotes)
               }
 
@@ -92,7 +101,7 @@ class ExampleSuite extends GivenWhenThen
             }*/
               //println(x)
               //println(str.result)
-              if (x.length==31) x.foreach(y=> println("|>"+y+"<|"+ y.toInt))
+              //if (x.length==31) x.foreach(y=> println("|>"+y+"<|"+ y.toInt))
               x should equal(str.result())
               /*for (z <- 0 to x.length() - 1) {
                 try {
@@ -104,9 +113,9 @@ class ExampleSuite extends GivenWhenThen
                 }
 
               }*/
-            })
+            })*/
         }
-        info("time: " + (System.currentTimeMillis() - time))
+        info("                        time: " + (System.currentTimeMillis() - time))
 
       }
     }

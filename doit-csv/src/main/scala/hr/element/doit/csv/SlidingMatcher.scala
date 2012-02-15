@@ -94,7 +94,7 @@ class CyclicCharacterMatcher(
             last.drop(head) ++ last.take(tail + 1)
           else
             last.drop(head).take(length)
-        println("r:"+readPoint+"c"+buffTake+":  "+ new String(sub)  + " : " + new String(refArray)+ "   last:" +new String(last))
+        //println("r:"+readPoint+"c"+buffTake+":  "+ new String(sub)  + " : " + new String(refArray)+ "   last:" +new String(last))
         sub sameElements refArray //revolver(0)
       }
     }
@@ -139,10 +139,9 @@ class CyclicCharacterMatcher(
 
   def flush(): Array[Char] = {
 
-    val tail = writePoint //+ last.length ) % last.length
+    val tail = writePoint
     val head = (tail + last.length - buffTake) % last.length
-
-     println("f:   " + buffTake+"   head = "+head+"    tail:"+tail+"    dif:"+ (tail - head))
+     //println("f:   " + buffTake+"   head = "+head+"    tail:"+tail+"    dif:"+ (tail - head))
 
     if (head > tail)
       last.drop(head) ++ last.take(tail)
@@ -157,7 +156,6 @@ class CyclicCharacterMatcher(
     //            last.drop(head).take(tail)
     //            else
     //                last.drop(head + 1 ).take(tail - head)
-
   }
 }
 

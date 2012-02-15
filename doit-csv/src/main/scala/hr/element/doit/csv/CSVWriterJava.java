@@ -32,7 +32,7 @@ public class CSVWriterJava {
       final boolean hasDelimiter = -1 != value.indexOf(config.delimiter);
       int valuePivot = -1;
       while(true){
-        valuePivot = value.indexOf(config.quotes, valuePivot + 1);
+        valuePivot = value.indexOf(config.quotes, valuePivot + config.quotes.length());
         if(valuePivot == -1) break ;
         quoteCount++;
       }
