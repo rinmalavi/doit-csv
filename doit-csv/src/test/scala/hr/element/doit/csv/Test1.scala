@@ -32,45 +32,84 @@ class ExampleSuite extends GivenWhenThen
 
   scenario("simple Test") {
     val outFileName = "/home/marin/doit/csvs/test1.csv"
-    for (i <- 100 to 199) {
-      val delimiter = (1234 + i).toString()
-      val newLine = (5678 + i).toString()
-      val quotes = (90 + i).toString()
-      val factory = CSVFactory.factory().
-        setDelimiter(delimiter).
-        setNewLine(newLine).
-        setQuotes(quotes)
-      //for( i <- 1 to 7){
-      val rand = new Random(i)
-      val writer = factory.getWriter(new FileOutputStream(outFileName))
-      for (j <- 1 to (i)) { // redovi
+    for (i <- 517 to 517) {
+      val delimiter = (i * 127).toString()
+      val newLine = (i * 25).toString()
+      val quotes = (i * 3).toString()
+      info("deli: " + delimiter + ", nL" + newLine + ", q " + quotes)
+      if (delimiter.contains(quotes) ||
+        delimiter.contains(newLine) ||
+        quotes.contains(newLine) ||
+        quotes.contains(delimiter) ||
+        newLine.contains(quotes) ||
+        newLine.contains(delimiter)) {}
+      else {
+        val factory = CSVFactory.factory().
+          setDelimiter(delimiter).
+          setNewLine(newLine).
+          setQuotes(quotes)
 
-        val str =
-          for (k <- 1 to i / 10)
-            yield rand.nextString(rand.nextInt() % i + 4)
-        val arr = str.toArray
-        //arr.foreach(println)
-        writer.write(arr)
+        /*val rand = new Random(i)
+        val writer = factory.getWriter(new FileOutputStream(outFileName))
+        for (j <- 1 to (i)) { // redovi
 
-      }
-      println("starting test " + i)
-      writer.close()
-      val r = new Random(i)
-      val reader = factory.getReader(new FileInputStream(outFileName))
-      while (reader.hasNext()) {
-        val lr = reader.next()
-        lr.foreach(
-          x => {
-            val ran = r.nextString((r.nextInt() % i) + 4)
-            //println(">"+ x+"<  >" +ran+"<")
-            x should equal(ran)
+          val str =
+            for (k <- 1 to i / 90) yield {
+              val str = new StringBuilder(
+                rand.nextString(rand.nextInt().abs % 20 + 4))
+              val l = str.length
+              for (l <- 1 to i / 170) {
+                str.insert((rand.nextInt().abs % l + 3), quotes)
+              }
+              str.result()
 
-          })
-        //   }
+            }
+          val arr = str.toArray
+          //arr.foreach(println)
+          writer.write(arr)
+
+        }
+
+        writer.close()*/info("Starting test :" + i)
+        val time = System.currentTimeMillis()
+        val r = new Random(i)
+        val f = new File(outFileName)
+        info("File size: " + f.length())
+        val reader = factory.getReader(new FileInputStream(f))
+        while (reader.hasNext()) {
+          val lr = reader.next()
+          lr.foreach(
+            x => {
+              val str = new StringBuilder(
+                r.nextString(r.nextInt().abs % 20 + 4))
+              val l = str.length
+              for (l <- 1 to i / 170) {
+                str.insert((r.nextInt().abs % l + 3), quotes)
+              }
+
+              //println("      >         |" + x + "|        <>        |" +str+"|        <       ")
+              /* if (!(x sameElements str.result()))  {println("miss")
+            }*/
+              //println(x)
+              //println(str.result)
+              if (x.length==31) x.foreach(y=> println("|>"+y+"<|"+ y.toInt))
+              x should equal(str.result())
+              /*for (z <- 0 to x.length() - 1) {
+                try {
+                  x(z) should equal(str.result()(z))
+                } catch {
+                  case e: StringIndexOutOfBoundsException =>
+                    print("|"+x+"|"+x.length())
+                    println(",|"+str.result+"|"+str.length())
+                }
+
+              }*/
+            })
+        }
+        info("time: " + (System.currentTimeMillis() - time))
 
       }
     }
-
   }
 }
 //  scenario("Inputing CSV into a line reading stream") {

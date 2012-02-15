@@ -52,6 +52,7 @@ class LineReader(config: CSVFactory, reader: Reader) extends Traversable[String]
       case Quote => Watch
       case NewLine => Ignore
       case Ch3(x) => Watch
+      case Cooldown => Ignore
       case _ => Unexpected
     }
   }
@@ -65,8 +66,8 @@ class LineReader(config: CSVFactory, reader: Reader) extends Traversable[String]
       case (StartMode, Ch3(_))      => VerboseMode
       case (StartMode, Cooldown)    => StartMode
       case (EscapeMode, Delimiter)  => StartMode
-      case (VerboseMode, Delimiter) => StartMode
-      case (VerboseMode, _        ) => StartMode
+      case (VerboseMode, Delimiter|NewLine) => StartMode
+      case (VerboseMode, Ch3(x)   ) => VerboseMode
       case (QuotedMode, Quote)      => EscapeMode
       case (QuotedMode, Cooldown)   => QuotedMode
       case (QuotedMode, Ch3(x))     => QuotedMode
@@ -108,27 +109,27 @@ class LineReader(config: CSVFactory, reader: Reader) extends Traversable[String]
       val read = reader.read()
 
       //println
-      //println( "loop: " + curr + " " + stringMode(mode)+" read :"+read.toChar)
+      println( "loop: " + curr + " " + stringMode(mode)+" read :"+read.toChar+"| uc"+read+"|")
       //res.foreach(x => println("res> "+ x ))
 
       if (read == -1){                                  // End Of File
         if (mode == QuotedMode) sys.error("Malformated CSV, unexpected eof!")
         else
           if (curr.nonEmpty)
-              res += (curr appendAll sliM.flush()).result
+              res += (curr append sliM.flush()).result()
             else
               res
         } else {
 
-          val result = sliM.consume(read.toChar, mode)
+          val returnResult = sliM.consume(read.toChar, mode)
           //println(result.getClass())
-          if (mode(result) == Unexpected ) sys.error("Malformated CSV! "+ stringMode(mode)+" with " + result.getClass())
+          if (mode(returnResult) == Unexpected ) sys.error("Malformated CSV! "+ stringMode(mode)+" with " + returnResult.getClass())
           else {
-            result match {
+            returnResult match {
               case Delimiter    =>
-                        curr.appendAll(sliM.flush())
-                        //println("delblibliteretarterd: " + curr)
-                        res += curr.result
+                        curr.append(sliM.flush())
+                        println("delblibliteretarterd: " + curr+" length: "+ curr.length)
+                        res += curr.result()
                         loop(conv(mode, Delimiter))
 
               case Quote        =>
@@ -139,12 +140,12 @@ class LineReader(config: CSVFactory, reader: Reader) extends Traversable[String]
                 else loop(conv(mode, Quote), curr append sliM.flush() )
 
               case NewLine      =>
-                curr.appendAll(sliM.flush())
+                curr.append(sliM.flush())
                 res += curr.result()
 
               case Ch3(x)       =>
-                loop(conv(mode, result),  curr.append(x))
-              case Cooldown     => loop(conv(mode, result),  curr)
+                loop(conv(mode, returnResult),  curr.append(x))
+              case Cooldown     => loop(conv(mode, returnResult),  curr)
               }
             }
           }

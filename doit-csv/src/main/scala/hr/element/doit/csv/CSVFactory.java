@@ -59,9 +59,9 @@ public class CSVFactory {
 
   // ----------------------------------------------------
 
-  public CSVWriter getWriter(final OutputStream oS) {
+  public CSVWriterJava getWriter(final OutputStream oS) {
     Writer w = new OutputStreamWriter(oS, encoding);
-    return new CSVWriter(this, w);
+    return new CSVWriterJava(this, w);
   }
 
   // -----------------------------------------------------
