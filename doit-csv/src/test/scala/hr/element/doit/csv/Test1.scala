@@ -41,16 +41,21 @@ class ExampleSuite extends GivenWhenThen
 
 
     for (i <- startCase to endCase) {
-      val delimiter = (i * 127).toString()
-      val newLine = (i * 25).toString()
-      val quotes = (i * 3).toString()
+      val t= new Random( i - 1)
+//      val delimiter = t.nextString(i / 50)
+//      val newLine = t.nextString(i / 60)
+//      val quotes = t.nextString(i / 70)
+      val delimiter = (  50).toString
+      val newLine = (  60).toString
+      val quotes = ( 170).toString
       //info("deli: " + delimiter + ", nL" + newLine + ", q " + quotes)
       if (delimiter.contains(quotes) ||
         delimiter.contains(newLine) ||
         quotes.contains(newLine) ||
         quotes.contains(delimiter) ||
         newLine.contains(quotes) ||
-        newLine.contains(delimiter)) {}
+        newLine.contains(delimiter)) {
+      }
       else {
         val factory = CSVFactory.factory().
           setDelimiter(delimiter).
@@ -87,8 +92,8 @@ class ExampleSuite extends GivenWhenThen
         val reader = factory.getReader(new FileInputStream(f))
         while (reader.hasNext()) {
           val lr = reader.next()
-          /*lr.foreach(
-            x => {
+          lr.foreach{
+            x =>
               val str = new StringBuilder(
                 r.nextString(r.nextInt().abs % strSize + 4))
               val l = str.length
@@ -112,11 +117,11 @@ class ExampleSuite extends GivenWhenThen
                     println(",|"+str.result+"|"+str.length())
                 }
 
-              }*/
+              }
             })*/
-        }
-        info("                        time: " + (System.currentTimeMillis() - time))
+        }}
 
+        info("                        time: " + (System.currentTimeMillis() - time))
       }
     }
   }

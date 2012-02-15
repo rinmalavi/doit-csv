@@ -81,13 +81,7 @@ class LineReader(config: CSVFactory, reader: Reader) extends Traversable[String]
     }
   }
 
-//  def checkvalid(mode: SmrModet, smr: Smr){
-//    (mode, smr) match {
-//      case (StartMode, x) => startMode(x)
-//      case (VerboseMode, x) => verboseMode(x)
-//      case (QuotedMode,x)   => quotedMode(x)
-//    }
-//  }
+
   val words: List[String] = {
 
     val res = new ArrayBuffer[String]

@@ -30,7 +30,7 @@ public class CSVWriterJava {
     int quoteCount = 0; {
       final boolean hasNewLine = -1 != value.indexOf(config.newLine);
       final boolean hasDelimiter = -1 != value.indexOf(config.delimiter);
-      int valuePivot = -1;
+      int valuePivot = -config.quotes.length();
       while(true){
         valuePivot = value.indexOf(config.quotes, valuePivot + config.quotes.length());
         if(valuePivot == -1) break ;
@@ -61,7 +61,12 @@ public class CSVWriterJava {
           oldValueTailPivot + quoteLength);
 
       if (oldValueTailPivot == -1) {
-        System.arraycopy(oldValue, oldValueHeadPivot, newValue, newValuePivot, oldValue.length - oldValueHeadPivot);
+        System.arraycopy(
+            oldValue,
+            oldValueHeadPivot,
+            newValue,
+            newValuePivot,
+            oldValue.length - oldValueHeadPivot);
         break;
       }
 

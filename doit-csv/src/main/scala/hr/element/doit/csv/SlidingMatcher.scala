@@ -110,7 +110,7 @@ class CyclicCharacterMatcher(
       clone()
 
   var writePoint = 0
-  def consume(read: Char, mode: (Smr => ModeCase)) = { //  should return error if buffer is not empty after special cases
+  def consume(read: Char, mode: (Smr => ModeCase)) = {
     val modedMatchers = rH.filter(x => mode(x.matchMsg) != Ignore)
     val bufflength = modedMatchers.maxBy(_.length).length
     last(writePoint) = read
@@ -147,15 +147,6 @@ class CyclicCharacterMatcher(
       last.drop(head) ++ last.take(tail)
     else
       last.drop(head).take(tail - head)
-    //    val tail = (writePoint  + last.length  -1 ) % last.length
-    //    val head = (tail - buffTake + last.length  ) % last.length
-    //    buffTake = 0
-    //    writePoint = 0
-    //
-    //          if ( head > tail )
-    //            last.drop(head).take(tail)
-    //            else
-    //                last.drop(head + 1 ).take(tail - head)
   }
 }
 
