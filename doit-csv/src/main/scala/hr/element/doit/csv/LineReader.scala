@@ -110,7 +110,7 @@ class LineReader(config: CSVFactory, reader: Reader) extends Traversable[String]
         if (mode == QuotedMode) sys.error("Malformated CSV, unexpected eof!")
         else
           if (curr.nonEmpty)
-              res += (curr append sliM.flush()).result()
+              res += (curr appendAll sliM.flush()).result()
             else
               res
         } else {
@@ -121,7 +121,7 @@ class LineReader(config: CSVFactory, reader: Reader) extends Traversable[String]
           else {
             returnResult match {
               case Delimiter    =>
-                        curr.append(sliM.flush())
+                        curr.appendAll(sliM.flush())
                         //println("delblibliteretarterd: " + curr+" length: "+ curr.length)
                         res += curr.result()
                         loop(conv(mode, Delimiter))
@@ -130,15 +130,15 @@ class LineReader(config: CSVFactory, reader: Reader) extends Traversable[String]
                 if (EscapeMode == mode)
                   loop(
                       conv(mode, Quote),
-                      curr append sliM.flush() append config.quotes)
-                else loop(conv(mode, Quote), curr append sliM.flush() )
+                      curr appendAll sliM.flush() append config.quotes)
+                else loop(conv(mode, Quote), curr appendAll sliM.flush() )
 
               case NewLine      =>
-                curr.append(sliM.flush())
+                curr appendAll sliM.flush()
                 res += curr.result()
 
               case Ch3(x)       =>
-                loop(conv(mode, returnResult),  curr.append(x))
+                loop(conv(mode, returnResult),  curr append x )
               case Cooldown     => loop(conv(mode, returnResult),  curr)
               }
             }

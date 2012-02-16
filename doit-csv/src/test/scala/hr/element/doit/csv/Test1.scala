@@ -88,7 +88,7 @@ class ExampleSuite extends GivenWhenThen
         val time = System.currentTimeMillis()
         val r = new Random(i)
         val f = new File(outFileName)
-        info("Starting test :" + i+ "File size: " + f.length())
+        info("Starting test :" + i+ ", File size: " + f.length())
         val reader = factory.getReader(new FileInputStream(f))
         while (reader.hasNext()) {
           val lr = reader.next()
