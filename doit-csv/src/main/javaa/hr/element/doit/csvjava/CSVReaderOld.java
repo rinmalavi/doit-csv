@@ -1,5 +1,8 @@
 package hr.element.doit.csvjava;
 
+
+import hr.element.doit.csv.LineReader;
+
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -7,13 +10,14 @@ import java.io.Reader;
 import java.util.Iterator;
 
 
-public class CSVReader implements Iterable<LineReader>, Iterator<LineReader> {
+
+public class CSVReaderOld implements Iterable<LineReader>, Iterator<LineReader> {
 
   private final CSVFactory config;
   private final Reader reader;
   private LineReader currentLine;
 
-  CSVReader(final CSVFactory config, final InputStream iS) {
+  CSVReaderOld(final CSVFactory config, final InputStream iS) {
     this.config = config;
     reader = new InputStreamReader(iS, config.encoding);
   }
@@ -33,7 +37,7 @@ public class CSVReader implements Iterable<LineReader>, Iterator<LineReader> {
 
     if (currentLine == null) {
       currentLine = new LineReader(config, reader);
-      hasMoreLines = currentLine.nonEmpty();
+      hasMoreLines = currentLine != null;
     }
 
     return  hasMoreLines;

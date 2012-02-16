@@ -23,17 +23,23 @@ class ExampleSuite extends GivenWhenThen
   with ShouldMatchers
   with FeatureSpec {
 
-  //  scenario("SlidingMatch test"){
-  //    info("")
-  //    val ssm = SlidingMatcher("q");
-  //
-  //    ssm.consume('q') should be (Delimiter)
-  //  }
-
+//    scenario("Complex test"){
+//      info("")
+//      val f = "/home/marin/doit/csvs/test2.csv"
+//      val factory = CSVFactory()
+//      val reader = factory.getReader(new FileInputStream(f))
+//
+//      reader.foreach(x =>{
+//          (x).foreach(y => print(y+"v"))
+//            println()
+//      })
+//    }
+//}
+//
   scenario("simple Test") {
     val outFileName = "/home/marin/doit/csvs/test1.csv"
       val startCase = 517
-      val endCase   = 557
+      val endCase   = 567
       val rowMod  = (i: Int) => (i)
       val colMod  = (i:Int )  =>(i / 60)
       val strSize = 120
@@ -57,10 +63,10 @@ class ExampleSuite extends GivenWhenThen
         newLine.contains(delimiter)) {
       }
       else {
-        val factory = CSVFactory.factory().
+        val factory = CSVFactory()/*.
           setDelimiter(delimiter).
           setNewLine(newLine).
-          setQuotes(quotes)
+          setQuotes(quotes)*/
 
         val rand = new Random(i)
         val writer = factory.getWriter(new FileOutputStream(outFileName))
@@ -90,9 +96,8 @@ class ExampleSuite extends GivenWhenThen
         val f = new File(outFileName)
         info("Starting test :" + i+ ", File size: " + f.length())
         val reader = factory.getReader(new FileInputStream(f))
-        while (reader.hasNext()) {
-          val lr = reader.next()
-          lr.foreach{
+        reader.foreach(
+          (_).foreach{
             x =>
               val str = new StringBuilder(
                 r.nextString(r.nextInt().abs % strSize + 4))
@@ -119,7 +124,7 @@ class ExampleSuite extends GivenWhenThen
 
               }
             })*/
-        }}
+          })
 
         info("                        time: " + (System.currentTimeMillis() - time))
       }

@@ -48,13 +48,21 @@ class SingleCharacterMatcher(
   Adelimiter: Array[Char],
   AnewLine: Array[Char])
   extends SlidingMatcher {
-  def consume(read: Char, mode: SmrMode) =
-    Array(read) match {
-      case Aquote => Quote
-      case Adelimiter => Delimiter
-      case AnewLine => NewLine
-      case x => Ch3(x.head)
+  def consume(read: Char, mode: SmrMode) = {
+    val exp = Vector(Delimiter,Quote, NewLine, Ch3(read)).filter( mode(_) != Ignore)
+    exp.find( _ match {
+          case Delimiter if (Adelimiter.head == read)=> true
+          case Quote if (Aquote.head == read)=> true
+          case NewLine if (AnewLine.head == read)=> true
+          case Ch3(x) =>  true
+          case _=> false
+          }) match {
+      case Some(x) => x
+      case None => NewLine
+
     }
+}
+
   def flush(): Array[Char] =
     Array.empty
 }

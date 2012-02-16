@@ -62,7 +62,7 @@ public class CSVFactory {
   }
 */
   // -----------------------------------------------------
-  public CSVReader getReader(final InputStream iS) {
-    return new CSVReader(this, iS);
+  public CSVReaderOld getReader(final InputStream iS) {
+    return new CSVReaderOld(this, iS);
   }
 }
