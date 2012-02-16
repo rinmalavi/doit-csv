@@ -29,7 +29,9 @@ class CSVFactory private(
     val newLine: String,
     val encoding: Charset){
   //----------------------------------------------------------------
-  def getReader(in: InputStream) = new CSVReader(this, in);
+  def getReader(in: InputStream) = CSVReader(this, in);
+  def getReaderWithHeaders(in: InputStream) = CSVReaderWithHeaders(this, in)
+
   def getWriter(out: OutputStream) =
       new CSVWriter(this, new OutputStreamWriter(out, encoding))
   //----------------------------------------------------------------

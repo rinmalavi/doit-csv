@@ -10,16 +10,23 @@ object LineReader {
 
 import LineReader._
 
-class LineReader(config: CSVFactory, reader: Reader) extends Traversable[String] {
+trait indexer{self:  LineReader =>
+  def apply(i: Int)={
+    self.words(i)
+  }
 
-//  val quote = config.quotes
-//  val delimiter = config.delimiter
-//  val newLine = config.newLine
-//  val quoteM = SlidingMatcher(quote)
-//  val delimiterM = SlidingMatcher(delimiter)
-//  val newLineM = SlidingMatcher(newLine)
+  def toSeq() = {
+      self.words.toSeq
+  }
+}
+
+trait LineReaderLike {
+  val words: List[String]
+}
 
 
+class LineReader(config: CSVFactory, reader: Reader)
+  extends LineReaderLike with Traversable[String] {
 
 
   val sliM = SlidingMatcher(config)
@@ -74,13 +81,12 @@ class LineReader(config: CSVFactory, reader: Reader) extends Traversable[String]
       case (EscapeMode, Quote)      => QuotedMode
       case (EscapeMode, Delimiter)  => StartMode
       case (EscapeMode, NewLine  )  => EndMode
-      case (EscapeMode, Cooldown  )  => EscapeMode
+      case (EscapeMode, Cooldown  ) => EscapeMode
       case (EscapeMode, x  )        => EscapeMode
-      case (EndMode,_)  => StupidMode
+      case (EndMode,_)              => StupidMode
       case _                        => EndMode
     }
   }
-
 
   val words: List[String] = {
 

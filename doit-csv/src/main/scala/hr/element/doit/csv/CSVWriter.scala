@@ -18,9 +18,6 @@ class CSVWriter(config: CSVFactory, w: Writer) {
     def parse2(l: String) = {
       var quoteCount = 0
       val quoteLen = config.quotes.length
-
-
-      val quotes  = config.quotes.toCharArray()
       @tailrec
       def count(lastPivot: Int) {
         val valuePivot = l.indexOf(config.quotes,
@@ -35,8 +32,6 @@ class CSVWriter(config: CSVFactory, w: Writer) {
       if (Seq(config.newLine,
         config.delimiter)
         .exists(l.contains) || (quoteCount != 0)) {
-
-        val newValueLength = l.length + (quoteCount + 2) * quoteLen
         val newValue = new StringBuilder()
 
         def buildStringFrom(i: Int) {

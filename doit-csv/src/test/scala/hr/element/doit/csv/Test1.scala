@@ -63,10 +63,10 @@ class ExampleSuite extends GivenWhenThen
         newLine.contains(delimiter)) {
       }
       else {
-        val factory = CSVFactory()/*.
+        val factory = CSVFactory().
           setDelimiter(delimiter).
           setNewLine(newLine).
-          setQuotes(quotes)*/
+          setQuote(quotes)
 
         val rand = new Random(i)
         val writer = factory.getWriter(new FileOutputStream(outFileName))
