@@ -30,8 +30,7 @@ class CSVFactory private(
     val encoding: Charset){
   //----------------------------------------------------------------
   def getReader(in: InputStream) = CSVReader(this, in);
-  def getReaderWithHeaders(in: InputStream) = CSVReaderWithHeaders(this, in)
-
+  def getReader(in: InputStream, opt: Headers) = CSVReader(this, in, opt)
   def getWriter(out: OutputStream) =
       new CSVWriter(this, new OutputStreamWriter(out, encoding))
   //----------------------------------------------------------------
