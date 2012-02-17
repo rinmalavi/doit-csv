@@ -2,31 +2,15 @@ package hr.element.doit.csv
 
 object SlidingMatcher {
 
-  /* def apply(delimiter: Char): SlidingMatcher =
-    apply(Array(delimiter))
-
-  def apply(delimiter: String): SlidingMatcher =
-    apply(delimiter.toCharArray)*/
-
-  //  def apply(qoute: Array[Char], delimiter: Array[Char], newLine: Array[Char]): SlidingMatcher =
-  //    Array(config.quote, config.newLine, config.deimiter) match {
-  //      case 1 =>
-  //        new SingleCharacterMatcher(delimiter.head)
-  //     // case 2 =>        new TwoCharacterMatcher(delimiter(0), delimiter(1))
-  //      case x if x > 2 =>
-  //        new CyclicCharacterMatcher(qoute, delimiter, newLine)
-  //      case _ =>
-  //        sys.error("Invalid delimiter length!")
-  //    }
   def apply(config: CSVFactory): SlidingMatcher =
-    Array(config.quotes, config.newLine, config.delimiter).maxBy(_.length).length match {
+    Seq(config.quotes, config.newLine, config.delimiter).maxBy(_.length).length match {
       case 1 =>
         new SingleCharacterMatcher(
-          config.quotes.toCharArray,
-          config.delimiter.toCharArray,
-          config.newLine.toCharArray)
+          config.quotes(0),
+          config.delimiter(0),
+          config.newLine(0))
       // case 2 =>        new TwoCharacterMatcher(delimiter(0), delimiter(1))
-      case x if x > 2 =>
+      case x if x > 1 =>
         new CyclicCharacterMatcher(
           config.quotes.toCharArray,
           config.delimiter.toCharArray,
@@ -44,22 +28,22 @@ trait SlidingMatcher {
 }
 
 class SingleCharacterMatcher(
-  Aquote: Array[Char],
-  Adelimiter: Array[Char],
-  AnewLine: Array[Char])
+  Aquote: Char,
+  Adelimiter: Char,
+  AnewLine: Char)
   extends SlidingMatcher {
   def consume(read: Char, mode: SmrMode) = {
     val exp = Vector(Delimiter,Quote, NewLine, Ch3(read)).filter( mode(_) != Ignore)
+
     exp.find( _ match {
-          case Delimiter if (Adelimiter.head == read)=> true
-          case Quote if (Aquote.head == read)=> true
-          case NewLine if (AnewLine.head == read)=> true
+          case Delimiter if (Adelimiter == read)=> true
+          case Quote if (Aquote == read)=> true
+          case NewLine if (AnewLine == read)=> true
           case Ch3(x) =>  true
           case _=> false
           }) match {
       case Some(x) => x
       case None => NewLine
-
     }
 }
 
@@ -149,7 +133,6 @@ class CyclicCharacterMatcher(
 
     val tail = writePoint
     val head = (tail + last.length - buffTake) % last.length
-     //println("f:   " + buffTake+"   head = "+head+"    tail:"+tail+"    dif:"+ (tail - head))
 
     if (head > tail)
       last.drop(head) ++ last.take(tail)

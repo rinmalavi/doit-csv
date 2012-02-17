@@ -11,26 +11,6 @@ object LineReader {
 
 import LineReader._
 
-//trait indexer{self:  LineReader =>
-//  def apply(i: Int)={
-//    self.words(i)
-//  }
-//
-//  def toSeq() = {
-//      self.words.toSeq
-//  }
-//}
-//
-//trait Maper {
-//  val header = List[String]()
-//}
-
-//trait Maper{
-//  def get(col: String): String
-//  def get(i: Int): String
-//  def getMap(): Map[String, String]
-//
-//}
 class LineReaderWithHeader(config: CSVFactory, reader: Reader, header: Columns)
   extends LineReader(config, reader) {
 
@@ -122,10 +102,6 @@ class LineReader(config: CSVFactory, reader: Reader) extends Traversable[String]
       curr: StringBuilder = new StringBuilder()) {
       val read = reader.read()
 
-      //println
-      //println( "loop: " + curr + " " + stringMode(mode)+" read :"+read.toChar+"| uc"+read+"|")
-      //res.foreach(x => println("res> "+ x ))
-
       if (read == -1) { // End Of File
         if (mode == QuotedMode) sys.error("Malformated CSV, unexpected eof!")
         else if (curr.nonEmpty)
@@ -133,15 +109,14 @@ class LineReader(config: CSVFactory, reader: Reader) extends Traversable[String]
         else
           res
       } else {
-
         val returnResult = sliM.consume(read.toChar, mode)
-        //println(result.getClass())
-        if (mode(returnResult) == Unexpected) sys.error("Malformated CSV! " + stringMode(mode) + " with " + returnResult.getClass())
+        if (mode(returnResult) == Unexpected)
+          sys.error("Malformated CSV! " + stringMode(mode) + " with " + returnResult.getClass())
         else {
           returnResult match {
             case Delimiter =>
               curr.appendAll(sliM.flush())
-              //println("delblibliteretarterd: " + curr+" length: "+ curr.length)
+
               res += curr.result()
               loop(conv(mode, Delimiter))
 
@@ -167,5 +142,4 @@ class LineReader(config: CSVFactory, reader: Reader) extends Traversable[String]
     loop(StartMode)
     res.toIndexedSeq
   }
-
 }
