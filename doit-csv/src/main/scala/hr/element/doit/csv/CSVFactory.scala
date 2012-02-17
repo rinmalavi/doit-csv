@@ -18,11 +18,11 @@ class CSVFactory private(
 
   //----------------------------------------------------------------
 
-  def getReader(in: InputStream) =
-    CSVReader(this, in);
+  def getReader(iS: InputStream) =
+    new CSVReader(this, iS)
 
-  def getReaderWithHeaders(in: InputStream) =
-    CSVReader.withHeaders(this, in)
+  def getReaderWithHeaders(iS: InputStream) =
+    new CSVReaderWithHeaders(this, iS)
 
   def getWriter(out: OutputStream) =
     new CSVWriter(this, out)
@@ -30,10 +30,10 @@ class CSVFactory private(
   //----------------------------------------------------------------
 
   def setDelimiter(delimiter: String) =
-    new CSVFactory(quotes, delimiter, newLine,encoding)
+    new CSVFactory(quotes, delimiter, newLine, encoding)
 
-  def setDelimiter(delimiter: Array[Char]) =
-    new CSVFactory(quotes, new String(delimiter), newLine,encoding)
+  def setDelimiter(delimiter: Array[Char]): CSVFactory =
+    setDelimiter(new String(delimiter))
 
   //----------------------------------------------------------------
 

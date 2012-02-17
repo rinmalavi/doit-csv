@@ -1,5 +1,3 @@
-
-
 package hr.element.doit.csv
 
 import scala.annotation.tailrec
@@ -12,7 +10,7 @@ class CSVWriter(config: CSVFactory, oS: OutputStream) {
   val quoteLen = config.quotes.length
 
   val escapes =
-    Seq(config.delimiter,        config.quotes, config.newLine)
+    Seq(config.delimiter, config.quotes, config.newLine)
 
   def quoteIfNecessary(l: String) {
     if (escapes.exists(l.contains)) {
@@ -51,6 +49,7 @@ class CSVWriter(config: CSVFactory, oS: OutputStream) {
         quoteIfNecessary(line(i))
       }
       w.write(config.newLine)
+      w.flush()
       this
     }
   }

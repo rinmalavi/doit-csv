@@ -25,17 +25,20 @@ class ExampleSuite2 extends GivenWhenThen
 
   scenario("Easy Test"){
     val outFileName = "/home/marin/doit/csvs/test2.csv"
-    val factory = CSVFactory()
+    val factory = CSVFactory().
+        setDelimiter("1234").
+        setNewLine("56").
+        setQuote("asdfgh")
 
     val oS= new FileOutputStream(outFileName)
     val writer = factory.getWriter( oS)
-    val header = IndexedSeq("first", "second", "third")
-    val line = IndexedSeq("1\";","2" ,  "3" )
+    //val header = IndexedSeq("first", "second", "third")
+    val line = IndexedSeq("1\"25asdfgh435426546;","2656543542" ,  "gfsgfsgfsgfsd3" )
 
-    writer.write(header.toArray)
+    //writer.write(header.toArray)
     writer.write(line.toArray)
-    writer.close()
-    //oS.close()
+    //writer.close()
+    oS.close()
 
 
     val reader = factory.getReader(
@@ -45,11 +48,11 @@ class ExampleSuite2 extends GivenWhenThen
 
     reader.foreach(_.foreach(println(_)))
   }
-
+//
   scenario("Simple withHeader Test.") {
     val outFileName = "/home/marin/doit/csvs/test1.csv"
-    val startCase = 517
-    val endCase = 567
+    val startCase = 6066
+    val endCase = 6067
     val strSize = 50
     val numOfQuotes = (i: Int) => i / 70
     val header = IndexedSeq("first", "second", "third")
@@ -58,11 +61,16 @@ class ExampleSuite2 extends GivenWhenThen
 
     for (i <- startCase to endCase) {
       val t = new Random(i - 1)
-      val factory = CSVFactory().
+      val factory = CSVFactory()/*.
         setDelimiter(t.nextString(i / 70)).
         setNewLine(t.nextString(i / 60)).
-        setQuote(t.nextString(i / 20))
+        setQuote(t.nextString(i / 20))*/
 
+
+   //    val factory = CSVFactory().
+//        setDelimiter("1234").
+//        setNewLine("56").
+//        setQuote("asdfgh")
       if (valid(factory)) {
         val oS= new FileOutputStream(outFileName)
         val writer = factory.getWriter(oS)
@@ -74,7 +82,7 @@ class ExampleSuite2 extends GivenWhenThen
           val arr = str.toArray
           writer.write(arr)
         }
-        writer.close()
+        oS.close()
         val time = System.currentTimeMillis()
         val r = new Random(i)
         val f = new File(outFileName)

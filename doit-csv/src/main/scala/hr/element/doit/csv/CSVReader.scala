@@ -3,27 +3,16 @@ package hr.element.doit.csv
 import scala.annotation.tailrec
 import scala.collection.Traversable
 
-import java.io.InputStream
-import java.io.Reader
-import java.io.InputStreamReader
+import java.io._
 
-abstract class CSVR[+T <:LineReader](config: CSVFactory, iS: InputStream) extends Traversable[T]{
+abstract class CSVReaderLike[+T <: LineReader](config: CSVFactory, iS: InputStream) extends Traversable[T]{
   val reader: Reader = new InputStreamReader(iS, config.encoding)
   def readLn() = new LineReader(config, reader)
 }
 
-object CSVReader {
-  def apply(config: CSVFactory, iS: InputStream) =
-    new CSVReader(config: CSVFactory, iS: InputStream)
-
-  def withHeaders(config: CSVFactory, iS: InputStream) = {
-    new CSVReaderWithHeaders(config: CSVFactory, iS: InputStream)
-  }
-}
-
 class CSVReader( config: CSVFactory, iS: InputStream)
-  extends CSVR[LineReader](config, iS)
-{
+    extends CSVReaderLike[LineReader](config, iS) {
+
   def foreach[U](f: LineReader => U) = {
     @tailrec
     def next() {
@@ -39,7 +28,7 @@ class CSVReader( config: CSVFactory, iS: InputStream)
 }
 
 class CSVReaderWithHeaders(config: CSVFactory, iS: InputStream)
-    extends  CSVR[LineReaderWithHeader](config, iS) {
+    extends  CSVReaderLike[LineReaderWithHeader](config, iS) {
 
   val header =
     new LineReader(config, reader).words
