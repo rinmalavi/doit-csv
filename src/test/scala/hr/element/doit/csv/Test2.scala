@@ -1,23 +1,15 @@
-package hr.element.doit
-
 package hr.element.doit.csv
+
+import org.scalatest.FunSuite
+import org.scalatest.matchers._
+import org.scalatest.GivenWhenThen
+import org.scalatest.FeatureSpec
+
+import scala.util.Random
 
 import java.security.SecureRandom
 import java.math.BigInteger
-import org.scalatest.FunSuite
-import scala.collection.mutable.Stack
-import org.scalatest.matchers._
-import hr.element.doit.csv._
-import org.scalatest.GivenWhenThen
-import org.scalatest.FeatureSpec
-import java.io.InputStreamReader
-import java.io.Reader
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import _root_.hr.element.doit.csv.CSVReader
-import _root_.hr.element.doit.csv.CSVFactory
-import scala.util.Random
+import java.io._
 
 class ExampleSuite2 extends GivenWhenThen
   with ShouldMatchers
