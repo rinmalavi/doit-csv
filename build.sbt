@@ -2,7 +2,7 @@ organization := "hr.element.doit"
 
 name         := "doit-csv"
 
-version      := "0.1.0"
+version      := "0.1.1"
 
 
 // ### Build settings ###
@@ -27,3 +27,8 @@ publishTo := Some("Element Releases"  at "http://maven.element.hr/nexus/content/
 credentials += Credentials(Path.userHome / ".publish" / "element.credentials")
 
 publishArtifact in (Compile, packageDoc) := false
+
+
+// ### Misc ###
+
+initialCommands := "import hr.element.doit.csv.CSVFactory"
