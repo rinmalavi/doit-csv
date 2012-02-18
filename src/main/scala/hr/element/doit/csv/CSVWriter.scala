@@ -4,9 +4,7 @@ import scala.annotation.tailrec
 
 import java.io._
 
-class CSVWriter(config: CSVFactory, oS: OutputStream) {
-  val w: Writer = new OutputStreamWriter(oS, config.encoding)
-
+class CSVWriter(config: CSVFactory, writer: Writer) {
   val quoteLen = config.quotes.length
 
   val escapes =
@@ -14,11 +12,11 @@ class CSVWriter(config: CSVFactory, oS: OutputStream) {
 
   def quoteIfNecessary(l: String) {
     if (escapes.exists(l.contains)) {
-      w.write(config.quotes)
+      writer.write(config.quotes)
       quote(l)
-      w.write(config.quotes)
+      writer.write(config.quotes)
     } else {
-      w.write(l)
+      writer.write(l)
     }
   }
 
@@ -28,30 +26,28 @@ class CSVWriter(config: CSVFactory, oS: OutputStream) {
 
     l.indexOf(config.quotes, i + quoteLen) match {
       case oldValTail if oldValTail == -1 =>
-        w.write(l substring oldValHead)
+        writer.write(l substring oldValHead)
       case oldValTai =>
-        w.write(l substring(oldValHead, oldValTai))
-        w.write(config.quotes)
+        writer.write(l substring(oldValHead, oldValTai))
+        writer.write(config.quotes)
         quote(l, oldValTai)
     }
   }
 
   def write(line: Array[String]) {
-
     if ((line == null) || line.isEmpty) {
       this
     }
     else {
       for (i <- line.indices) {
         if (i != 0){
-          w.write(config.delimiter)
+          writer.write(config.delimiter)
         }
         quoteIfNecessary(line(i))
       }
-      w.write(config.newLine)
-      w.flush()
+      writer.write(config.newLine)
+      writer.flush()
       this
     }
   }
-  def close() { w.close() }
 }

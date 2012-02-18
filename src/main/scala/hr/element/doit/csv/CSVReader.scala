@@ -5,13 +5,12 @@ import scala.collection.Traversable
 
 import java.io._
 
-abstract class CSVReaderLike[+T <: LineReader](config: CSVFactory, iS: InputStream) extends Traversable[T]{
-  val reader: Reader = new InputStreamReader(iS, config.encoding)
+abstract class CSVReaderLike[+T <: LineReader](config: CSVFactory, reader: Reader) extends Traversable[T]{
   def readLn() = new LineReader(config, reader)
 }
 
-class CSVReader( config: CSVFactory, iS: InputStream)
-    extends CSVReaderLike[LineReader](config, iS) {
+class CSVReader(config: CSVFactory, reader: Reader)
+    extends CSVReaderLike[LineReader](config, reader) {
 
   def foreach[U](f: LineReader => U) = {
     @tailrec
@@ -27,8 +26,8 @@ class CSVReader( config: CSVFactory, iS: InputStream)
   }
 }
 
-class CSVReaderWithHeaders(config: CSVFactory, iS: InputStream)
-    extends  CSVReaderLike[LineReaderWithHeader](config, iS) {
+class CSVReaderWithHeaders(config: CSVFactory, reader: Reader)
+    extends CSVReaderLike[LineReaderWithHeader](config, reader) {
 
   val header =
     new LineReader(config, reader).words

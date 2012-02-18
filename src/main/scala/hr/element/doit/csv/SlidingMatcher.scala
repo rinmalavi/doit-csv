@@ -24,6 +24,7 @@ object SlidingMatcher {
 
 import SlidingMatcher._
 import LineReader._
+
 trait SlidingMatcher {
   def consume(read: Char, mode: SmrMode): Smr
   def flush(): Array[Char]
