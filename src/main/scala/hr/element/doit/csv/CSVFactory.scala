@@ -3,7 +3,7 @@ package hr.element.doit.csv
 import java.io._
 import java.nio.charset.Charset
 
-class CSVFactory private(
+class CSVFactory(
     val quotes: String,
     val delimiter: String,
     val newLine: String,
@@ -20,7 +20,8 @@ class CSVFactory private(
 }
 
 trait DelimiterSetter { _: CSVFactory =>
-  def setDelimiter(delimiter: String): CSVFactory
+  def setDelimiter(delimiter: String) =
+    new CSVFactory(quotes, delimiter, newLine, encoding)
 
   def setDelimiter(delimiter: CharSequence): CSVFactory =
     setDelimiter(delimiter.toString)
@@ -33,7 +34,8 @@ trait DelimiterSetter { _: CSVFactory =>
 }
 
 trait QuotesSetter { _: CSVFactory =>
-  def setQuotes(quotes: String): CSVFactory
+  def setQuotes(quotes: String): CSVFactory =
+    new CSVFactory(quotes, delimiter, newLine, encoding)
 
   def setQuotes(quotes: CharSequence): CSVFactory =
     setQuotes(quotes)
@@ -47,7 +49,8 @@ trait QuotesSetter { _: CSVFactory =>
 
 
 trait NewLineSetter { _: CSVFactory =>
-  def setNewLine(newLine: String): CSVFactory
+  def setNewLine(newLine: String) =
+    new CSVFactory(quotes, delimiter, newLine, encoding)
 
   def setNewLine(newLine: CharSequence): CSVFactory =
     setNewLine(newLine.toString)
@@ -60,7 +63,8 @@ trait NewLineSetter { _: CSVFactory =>
 }
 
 trait EncodingSetter { _: CSVFactory =>
-  def setEncoding(encoding: Charset): CSVFactory
+  def setEncoding(encoding: Charset) =
+    new CSVFactory(quotes, delimiter, newLine, encoding)
 
   def setEncoding(encoding: String): CSVFactory =
     setEncoding(Charset.forName(encoding))
@@ -72,234 +76,162 @@ object CSVFactory
     with DelimiterSetter
     with NewLineSetter
     with EncodingSetter {
-  def setQuotes(quotes: String) =
+  override def setQuotes(quotes: String) =
     new CSVFactory(quotes, delimiter, newLine, encoding)
-      with DelimiterSetter
-      with NewLineSetter
-      with EncodingSetter {
-        def setDelimiter(delimiter: String) =
-          new CSVFactory(quotes, delimiter, newLine, encoding)
+        with DelimiterSetter
+        with NewLineSetter
+        with EncodingSetter {
+      override def setDelimiter(delimiter: String) =
+        new CSVFactory(quotes, delimiter, newLine, encoding)
             with NewLineSetter
             with EncodingSetter {
-              def setNewLine(newLine: String) =
-                new CSVFactory(quotes, delimiter, newLine, encoding)
-                  with EncodingSetter {
-                    def setEncoding(encoding: Charset) =
-                      new CSVFactory(quotes, delimiter, newLine, encoding)
-                  }
-              def setEncoding(encoding: Charset) =
-                new CSVFactory(quotes, delimiter, newLine, encoding)
-                  with NewLineSetter {
-                    def setNewLine(newLine: String) =
-                      new CSVFactory(quotes, delimiter, newLine, encoding)
-                  }
-            }
-        def setNewLine(newLine: String) =
-          new CSVFactory(quotes, delimiter, newLine, encoding)
+          override def setNewLine(newLine: String) =
+            new CSVFactory(quotes, delimiter, newLine, encoding)
+                with EncodingSetter
+          override def setEncoding(encoding: Charset) =
+            new CSVFactory(quotes, delimiter, newLine, encoding)
+                with NewLineSetter
+        }
+      override def setNewLine(newLine: String) =
+        new CSVFactory(quotes, delimiter, newLine, encoding)
             with DelimiterSetter
             with EncodingSetter {
-              def setDelimiter(delimiter: String) =
-                new CSVFactory(quotes, delimiter, newLine, encoding)
-                  with EncodingSetter {
-                    def setEncoding(encoding: Charset) =
-                      new CSVFactory(quotes, delimiter, newLine, encoding)
-                  }
-              def setEncoding(encoding: Charset) =
-                new CSVFactory(quotes, delimiter, newLine, encoding)
-                  with DelimiterSetter {
-                    def setDelimiter(delimiter: String) =
-                      new CSVFactory(quotes, delimiter, newLine, encoding)
-                  }
-            }
-        def setEncoding(encoding: Charset) =
-          new CSVFactory(quotes, delimiter, newLine, encoding)
+          override def setDelimiter(delimiter: String) =
+            new CSVFactory(quotes, delimiter, newLine, encoding)
+                with EncodingSetter
+          override def setEncoding(encoding: Charset) =
+            new CSVFactory(quotes, delimiter, newLine, encoding)
+                with DelimiterSetter
+        }
+      override def setEncoding(encoding: Charset) =
+        new CSVFactory(quotes, delimiter, newLine, encoding)
             with DelimiterSetter
             with NewLineSetter {
-              def setDelimiter(delimiter: String) =
-                new CSVFactory(quotes, delimiter, newLine, encoding)
-                  with NewLineSetter {
-                    def setNewLine(newLine: String) =
-                      new CSVFactory(quotes, delimiter, newLine, encoding)
-                  }
-              def setNewLine(newLine: String) =
-                new CSVFactory(quotes, delimiter, newLine, encoding)
-                  with DelimiterSetter {
-                    def setDelimiter(delimiter: String) =
-                      new CSVFactory(quotes, delimiter, newLine, encoding)
-                  }
-            }
-      }
-  def setDelimiter(delimiter: String) =
+          override def setDelimiter(delimiter: String) =
+            new CSVFactory(quotes, delimiter, newLine, encoding)
+                with NewLineSetter
+          override def setNewLine(newLine: String) =
+            new CSVFactory(quotes, delimiter, newLine, encoding)
+                with DelimiterSetter
+        }
+    }
+  override def setDelimiter(delimiter: String) =
     new CSVFactory(quotes, delimiter, newLine, encoding)
-      with QuotesSetter
-      with NewLineSetter
-      with EncodingSetter {
-        def setQuotes(quotes: String) =
-          new CSVFactory(quotes, delimiter, newLine, encoding)
+        with QuotesSetter
+        with NewLineSetter
+        with EncodingSetter {
+      override def setQuotes(quotes: String) =
+        new CSVFactory(quotes, delimiter, newLine, encoding)
             with NewLineSetter
             with EncodingSetter {
-              def setNewLine(newLine: String) =
-                new CSVFactory(quotes, delimiter, newLine, encoding)
-                  with EncodingSetter {
-                    def setEncoding(encoding: Charset) =
-                      new CSVFactory(quotes, delimiter, newLine, encoding)
-                  }
-              def setEncoding(encoding: Charset) =
-                new CSVFactory(quotes, delimiter, newLine, encoding)
-                  with NewLineSetter {
-                    def setNewLine(newLine: String) =
-                      new CSVFactory(quotes, delimiter, newLine, encoding)
-                  }
-            }
-        def setNewLine(newLine: String) =
-          new CSVFactory(quotes, delimiter, newLine, encoding)
+          override def setNewLine(newLine: String) =
+            new CSVFactory(quotes, delimiter, newLine, encoding)
+                with EncodingSetter
+          override def setEncoding(encoding: Charset) =
+            new CSVFactory(quotes, delimiter, newLine, encoding)
+                with NewLineSetter
+        }
+      override def setNewLine(newLine: String) =
+        new CSVFactory(quotes, delimiter, newLine, encoding)
             with QuotesSetter
             with EncodingSetter {
-              def setQuotes(quotes: String) =
-                new CSVFactory(quotes, delimiter, newLine, encoding)
-                  with EncodingSetter {
-                    def setEncoding(encoding: Charset) =
-                      new CSVFactory(quotes, delimiter, newLine, encoding)
-                  }
-              def setEncoding(encoding: Charset) =
-                new CSVFactory(quotes, delimiter, newLine, encoding)
-                  with QuotesSetter {
-                    def setQuotes(quotes: String) =
-                      new CSVFactory(quotes, delimiter, newLine, encoding)
-                  }
-            }
-        def setEncoding(encoding: Charset) =
-          new CSVFactory(quotes, delimiter, newLine, encoding)
+          override def setQuotes(quotes: String) =
+            new CSVFactory(quotes, delimiter, newLine, encoding)
+                with EncodingSetter
+          override def setEncoding(encoding: Charset) =
+            new CSVFactory(quotes, delimiter, newLine, encoding)
+                with QuotesSetter
+        }
+      override def setEncoding(encoding: Charset) =
+        new CSVFactory(quotes, delimiter, newLine, encoding)
             with QuotesSetter
             with NewLineSetter {
-              def setQuotes(quotes: String) =
-                new CSVFactory(quotes, delimiter, newLine, encoding)
-                  with NewLineSetter {
-                    def setNewLine(newLine: String) =
-                      new CSVFactory(quotes, delimiter, newLine, encoding)
-                  }
-              def setNewLine(newLine: String) =
-                new CSVFactory(quotes, delimiter, newLine, encoding)
-                  with QuotesSetter {
-                    def setQuotes(quotes: String) =
-                      new CSVFactory(quotes, delimiter, newLine, encoding)
-                  }
-            }
-      }
-  def setNewLine(newLine: String) =
+          override def setQuotes(quotes: String) =
+            new CSVFactory(quotes, delimiter, newLine, encoding)
+                with NewLineSetter
+          override def setNewLine(newLine: String) =
+            new CSVFactory(quotes, delimiter, newLine, encoding)
+                with QuotesSetter
+        }
+    }
+  override def setNewLine(newLine: String) =
     new CSVFactory(quotes, delimiter, newLine, encoding)
-      with QuotesSetter
-      with DelimiterSetter
-      with EncodingSetter {
-        def setQuotes(quotes: String) =
-          new CSVFactory(quotes, delimiter, newLine, encoding)
+        with QuotesSetter
+        with DelimiterSetter
+        with EncodingSetter {
+      override def setQuotes(quotes: String) =
+        new CSVFactory(quotes, delimiter, newLine, encoding)
             with DelimiterSetter
             with EncodingSetter {
-              def setDelimiter(delimiter: String) =
-                new CSVFactory(quotes, delimiter, newLine, encoding)
-                  with EncodingSetter {
-                    def setEncoding(encoding: Charset) =
-                      new CSVFactory(quotes, delimiter, newLine, encoding)
-                  }
-              def setEncoding(encoding: Charset) =
-                new CSVFactory(quotes, delimiter, newLine, encoding)
-                  with DelimiterSetter {
-                    def setDelimiter(delimiter: String) =
-                      new CSVFactory(quotes, delimiter, newLine, encoding)
-                  }
-            }
-        def setDelimiter(delimiter: String) =
-          new CSVFactory(quotes, delimiter, newLine, encoding)
+          override def setDelimiter(delimiter: String) =
+            new CSVFactory(quotes, delimiter, newLine, encoding)
+                with EncodingSetter
+          override def setEncoding(encoding: Charset) =
+            new CSVFactory(quotes, delimiter, newLine, encoding)
+                with DelimiterSetter
+        }
+      override def setDelimiter(delimiter: String) =
+        new CSVFactory(quotes, delimiter, newLine, encoding)
             with QuotesSetter
             with EncodingSetter {
-              def setQuotes(quotes: String) =
-                new CSVFactory(quotes, delimiter, newLine, encoding)
-                  with EncodingSetter {
-                    def setEncoding(encoding: Charset) =
-                      new CSVFactory(quotes, delimiter, newLine, encoding)
-                  }
-              def setEncoding(encoding: Charset) =
-                new CSVFactory(quotes, delimiter, newLine, encoding)
-                  with QuotesSetter {
-                    def setQuotes(quotes: String) =
-                      new CSVFactory(quotes, delimiter, newLine, encoding)
-                  }
-            }
-        def setEncoding(encoding: Charset) =
-          new CSVFactory(quotes, delimiter, newLine, encoding)
+          override def setQuotes(quotes: String) =
+            new CSVFactory(quotes, delimiter, newLine, encoding)
+                with EncodingSetter
+          override def setEncoding(encoding: Charset) =
+            new CSVFactory(quotes, delimiter, newLine, encoding)
+                with QuotesSetter
+        }
+      override def setEncoding(encoding: Charset) =
+        new CSVFactory(quotes, delimiter, newLine, encoding)
             with QuotesSetter
             with DelimiterSetter {
-              def setQuotes(quotes: String) =
-                new CSVFactory(quotes, delimiter, newLine, encoding)
-                  with DelimiterSetter {
-                    def setDelimiter(delimiter: String) =
-                      new CSVFactory(quotes, delimiter, newLine, encoding)
-                  }
-              def setDelimiter(delimiter: String) =
-                new CSVFactory(quotes, delimiter, newLine, encoding)
-                  with QuotesSetter {
-                    def setQuotes(quotes: String) =
-                      new CSVFactory(quotes, delimiter, newLine, encoding)
-                  }
-            }
-      }
-  def setEncoding(encoding: Charset) =
+          override def setQuotes(quotes: String) =
+            new CSVFactory(quotes, delimiter, newLine, encoding)
+                with DelimiterSetter
+          override def setDelimiter(delimiter: String) =
+            new CSVFactory(quotes, delimiter, newLine, encoding)
+                with QuotesSetter
+        }
+    }
+  override def setEncoding(encoding: Charset) =
     new CSVFactory(quotes, delimiter, newLine, encoding)
-      with QuotesSetter
-      with DelimiterSetter
-      with NewLineSetter {
-        def setQuotes(quotes: String) =
-          new CSVFactory(quotes, delimiter, newLine, encoding)
+        with QuotesSetter
+        with DelimiterSetter
+        with NewLineSetter {
+      override def setQuotes(quotes: String) =
+        new CSVFactory(quotes, delimiter, newLine, encoding)
             with DelimiterSetter
             with NewLineSetter {
-              def setDelimiter(delimiter: String) =
-                new CSVFactory(quotes, delimiter, newLine, encoding)
-                  with NewLineSetter {
-                    def setNewLine(newLine: String) =
-                      new CSVFactory(quotes, delimiter, newLine, encoding)
-                  }
-              def setNewLine(newLine: String) =
-                new CSVFactory(quotes, delimiter, newLine, encoding)
-                  with DelimiterSetter {
-                    def setDelimiter(delimiter: String) =
-                      new CSVFactory(quotes, delimiter, newLine, encoding)
-                  }
-            }
-        def setDelimiter(delimiter: String) =
-          new CSVFactory(quotes, delimiter, newLine, encoding)
+          override def setDelimiter(delimiter: String) =
+            new CSVFactory(quotes, delimiter, newLine, encoding)
+                with NewLineSetter
+          override def setNewLine(newLine: String) =
+            new CSVFactory(quotes, delimiter, newLine, encoding)
+                with DelimiterSetter
+        }
+      override def setDelimiter(delimiter: String) =
+        new CSVFactory(quotes, delimiter, newLine, encoding)
             with QuotesSetter
             with NewLineSetter {
-              def setQuotes(quotes: String) =
-                new CSVFactory(quotes, delimiter, newLine, encoding)
-                  with NewLineSetter {
-                    def setNewLine(newLine: String) =
-                      new CSVFactory(quotes, delimiter, newLine, encoding)
-                  }
-              def setNewLine(newLine: String) =
-                new CSVFactory(quotes, delimiter, newLine, encoding)
-                  with QuotesSetter {
-                    def setQuotes(quotes: String) =
-                      new CSVFactory(quotes, delimiter, newLine, encoding)
-                  }
-            }
-        def setNewLine(newLine: String) =
-          new CSVFactory(quotes, delimiter, newLine, encoding)
+          override def setQuotes(quotes: String) =
+            new CSVFactory(quotes, delimiter, newLine, encoding)
+                with NewLineSetter
+          override def setNewLine(newLine: String) =
+            new CSVFactory(quotes, delimiter, newLine, encoding)
+                with QuotesSetter
+        }
+      override def setNewLine(newLine: String) =
+        new CSVFactory(quotes, delimiter, newLine, encoding)
             with QuotesSetter
             with DelimiterSetter {
-              def setQuotes(quotes: String) =
-                new CSVFactory(quotes, delimiter, newLine, encoding)
-                  with DelimiterSetter {
-                    def setDelimiter(delimiter: String) =
-                      new CSVFactory(quotes, delimiter, newLine, encoding)
-                  }
-              def setDelimiter(delimiter: String) =
-                new CSVFactory(quotes, delimiter, newLine, encoding)
-                  with QuotesSetter {
-                    def setQuotes(quotes: String) =
-                      new CSVFactory(quotes, delimiter, newLine, encoding)
-                  }
-            }
-      }
+          override def setQuotes(quotes: String) =
+            new CSVFactory(quotes, delimiter, newLine, encoding)
+                with DelimiterSetter
+          override def setDelimiter(delimiter: String) =
+            new CSVFactory(quotes, delimiter, newLine, encoding)
+                with QuotesSetter
+        }
+    }
 }
 
 /*
@@ -324,23 +256,23 @@ object CSVFactoryIAmSaneEnoughNotToWriteThatByHandThankYouBuilder extends App {
 
   def buildSetter(s: Setter, others: List[Setter], padCount: Int): String = {
     val defLine =
-      "%sdef set%s(%s: %s) =%s".format(padding * padCount, s.name, s.argument, s.clazzString, newLine)
+      "%soverride def set%s(%s: %s) =%s".format(padding * (padCount + 1), s.name, s.argument, s.clazzString, newLine)
 
     val cLine =
-      "%s%s%s".format(padding * (padCount + 1), constructorLine, newLine)
+      "%s%s%s".format(padding * (padCount + 2), constructorLine, newLine)
 
     val mixins =
       others.map(o =>
-        "%swith %sSetter".format(padding * (padCount + 2), o.name)
+        "%swith %sSetter".format(padding * (padCount + 4), o.name)
       ).mkString(newLine)
 
     val body =
       others match {
-        case Nil =>
-          ""
+        case _ :: Nil =>
+          newLine
 
         case _ =>
-          " {%s%s%s}%s".format(newLine, buildSetters(others, padCount + 3), padding * (padCount + 2), newLine)
+          " {%s%s%s}%s".format(newLine, buildSetters(others, padCount + 2), padding * (padCount + 2), newLine)
       }
 
     defLine + cLine + mixins + body
@@ -349,6 +281,6 @@ object CSVFactoryIAmSaneEnoughNotToWriteThatByHandThankYouBuilder extends App {
   def buildSetters(setters: List[Setter], padCount: Int) =
     setters.map(s => buildSetter(s, setters.filterNot(s ==), padCount)).mkString("")
 
-  println(buildSetters(setters, 1))
+  println(buildSetters(setters, 0))
 }
 */
