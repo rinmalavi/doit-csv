@@ -13,7 +13,7 @@ object LineReader {
 
 import LineReader._
 
-class LineReaderWithHeader(config: CSVFactory, reader: Reader, header: Columns)
+class LineReaderWithHeader(config: CSVConfig, reader: Reader, header: Columns)
   extends LineReader(config, reader) {
 
   def apply(col: String) =
@@ -26,7 +26,7 @@ class LineReaderWithHeader(config: CSVFactory, reader: Reader, header: Columns)
     header.mapValues(words)
 }
 
-class LineReader(config: CSVFactory, reader: Reader) extends IndexedSeq[String] {
+class LineReader(config: CSVConfig, reader: Reader) extends IndexedSeq[String] {
 
   def apply(index: Int) =
     words(index)

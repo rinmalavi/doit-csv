@@ -4,7 +4,7 @@ import scala.annotation.tailrec
 
 import java.io._
 
-class CSVWriter(config: CSVFactory, writer: Writer) {
+class CSVWriter(config: CSVConfig, writer: Writer) {
   val quoteLen = config.quotes.length
 
   val escapes =

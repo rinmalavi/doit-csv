@@ -2,7 +2,7 @@ package hr.element.doit.csv
 
 object SlidingMatcher {
 
-  def apply(config: CSVFactory): SlidingMatcher =
+  def apply(config: CSVConfig): SlidingMatcher =
     Seq(config.quotes, config.newLine, config.delimiter).maxBy(_.length).length match {
       case 1 =>
         new SingleCharacterMatcher(
