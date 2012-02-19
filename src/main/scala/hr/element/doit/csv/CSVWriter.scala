@@ -21,8 +21,7 @@ class CSVWriter(config: CSVConfig, writer: Writer) {
   }
 
   def quote(l: String, i: Int = -quoteLen) {
-    val oldValHead =
-      math.max(i, 0)
+    val oldValHead = math.max(i, 0)
 
     l.indexOf(config.quotes, i + quoteLen) match {
       case oldValTail if oldValTail == -1 =>
@@ -35,19 +34,15 @@ class CSVWriter(config: CSVConfig, writer: Writer) {
   }
 
   def write(line: Array[String]) {
-    if ((line == null) || line.isEmpty) {
-      this
-    }
-    else {
-      for (i <- line.indices) {
-        if (i != 0){
-          writer.write(config.delimiter)
-        }
+    if (null ne line) {
+      quoteIfNecessary(line(0))
+      for (i <- line.indices.tail) {
+        writer.write(config.delimiter)
         quoteIfNecessary(line(i))
       }
       writer.write(config.newLine)
       writer.flush()
-      this
     }
+    this
   }
 }
