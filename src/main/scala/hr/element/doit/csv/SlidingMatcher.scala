@@ -9,17 +9,19 @@ object SlidingMatcher {
           config.quotes(0),
           config.delimiter(0),
           config.newLine(0))
+      case 2 => new TwoCharacterMatcher(
+        config.quotes.toCharArray,
+        config.delimiter.toCharArray,
+        config.newLine.toCharArray)
 
-        // case 2 =>        new TwoCharacterMatcher(delimiter(0), delimiter(1))
-
-        case x if x > 1 =>
-          new CyclicCharacterMatcher(
-            config.quotes.toCharArray,
-            config.delimiter.toCharArray,
-            config.newLine.toCharArray)
-        case _ =>
-          sys.error("Invalid delimiter length!")
-      }
+      case x if x > 1 =>
+        new CyclicCharacterMatcher(
+          config.quotes.toCharArray,
+          config.delimiter.toCharArray,
+          config.newLine.toCharArray)
+      case _ =>
+        sys.error("Invalid delimiter length!")
+    }
 }
 
 import SlidingMatcher._
@@ -28,12 +30,13 @@ import LineReader._
 trait SlidingMatcher {
   def consume(read: Char, mode: SmrMode): Smr
   def flush(): Array[Char]
+  private val ExpectedMatches = (read: Char) => Vector(Delimiter, Quote, NewLine, ReadCh(read))
 }
 
 class SingleCharacterMatcher(
-    Aquote: Char,
-    Adelimiter: Char,
-    AnewLine: Char) extends SlidingMatcher {
+  Aquote: Char,
+  Adelimiter: Char,
+  AnewLine: Char) extends SlidingMatcher {
 
   def consume(read: Char, mode: SmrMode) = {
     val exp = Vector(Delimiter, Quote, NewLine, ReadCh(read)).filter(mode(_) != Ignore)
@@ -53,10 +56,36 @@ class SingleCharacterMatcher(
 
 import scala.annotation.tailrec
 
+class TwoCharacterMatcher(
+  quotes: Array[Char],
+  delimiter: Array[Char],
+  newLine: Array[Char])
+  extends SlidingMatcher {
+
+  case class Res(val arr: Array[Char],
+    val matchMsg: Smr)
+  val rh = Vector(Res(quotes, Quote),
+    Res(delimiter, Delimiter),
+    Res(newLine, NewLine))
+
+  var buff: Option[Int] = None
+
+  def consume(read: Char, mode: SmrMode) = {
+    rh.filter(x => mode(x.matchMsg) != Ignore)
+
+    Cooldown
+  }
+  def flush(): Array[Char] =
+    buff match {
+      case Some(x) => x
+
+    }
+
+}
 class CyclicCharacterMatcher(
-    QuoteA: Array[Char],
-    DelimiterA: Array[Char],
-    NewLineA: Array[Char]) extends SlidingMatcher {
+  QuoteA: Array[Char],
+  DelimiterA: Array[Char],
+  NewLineA: Array[Char]) extends SlidingMatcher {
 
   var buffTake = 0
 

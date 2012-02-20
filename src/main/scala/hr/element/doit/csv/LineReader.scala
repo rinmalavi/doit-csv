@@ -1,17 +1,16 @@
 package hr.element.doit.csv
 
 import java.io.Reader
-
 import scala.annotation.tailrec
-
 import scala.collection.immutable.VectorBuilder
+import LineReader._
 
 object LineReader {
   type SmrMode = Smr => ModeCase
   type Columns = Map[String, Int]
 }
 
-import LineReader._
+
 
 class LineReaderWithHeader(config: CSVConfig, reader: Reader, header: Columns)
   extends LineReader(config, reader) {
