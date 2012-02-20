@@ -2,7 +2,7 @@ organization := "hr.element.doit"
 
 name         := "doit-csv"
 
-version      := "0.1.2"
+version      := "0.1.3"
 
 
 // ### Build settings ###

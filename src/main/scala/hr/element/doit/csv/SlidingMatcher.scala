@@ -62,22 +62,45 @@ class TwoCharacterMatcher(
   newLine: Array[Char])
   extends SlidingMatcher {
 
-  case class Res(val arr: Array[Char],
-    val matchMsg: Smr)
+  var buff: Option[Char] = None
+  case class Res(
+      val arr: Array[Char],
+      val matchMsg: Smr)
+      {
+    val is = ((x: Char ) => if (arr.length==2) (arr(0) == buff.get && arr(1) == x)
+                              else (arr(0) == x))
+      }
   val rh = Vector(Res(quotes, Quote),
     Res(delimiter, Delimiter),
     Res(newLine, NewLine))
+  val expected = ((mode: SmrMode) => rh.filter(x => mode(x.matchMsg) != Ignore))
+  val oneCharFind  = ((read: Char) => rh.filter(x => x.arr.length == 1).find(_.is(read)))
 
-  var buff: Option[Int] = None
-
-  def consume(read: Char, mode: SmrMode) = {
-    rh.filter(x => mode(x.matchMsg) != Ignore)
-
-    Cooldown
+  def consume(read: Char, mode: SmrMode): Smr = {
+    buff match {
+      case Some(x) =>
+        expected(mode).find( _.is(read)) match {
+          case Some(someRes) =>
+            if(someRes.arr.length == 2)
+              buff = None
+            someRes.matchMsg
+          case None =>
+            buff = Some(read)
+            ReadCh(x)
+        }
+      case None =>
+        oneCharFind(read) match {
+          case None =>
+            buff = Some(read)
+            Cooldown
+          case Some(y) => y.matchMsg
+        }
+    }
   }
   def flush(): Array[Char] =
     buff match {
-      case Some(x) => x
+      case Some(x) => Array(x)
+      case None => Array.empty
 
     }
 
