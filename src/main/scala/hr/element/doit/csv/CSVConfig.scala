@@ -33,7 +33,7 @@ class CSVConfig protected(
 
 object CSVConfig {
   val default =
-    new CSVConfig(";", "\\n", "\"")
+    new CSVConfig(";", "\n", "\"")
       .setEncoding(Charset.forName("UTF8"))
 
   def setDelimiter(delimiter: CharSequence) =

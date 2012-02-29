@@ -10,8 +10,6 @@ object LineReader {
   type Columns = Map[String, Int]
 }
 
-
-
 class LineReaderWithHeader(config: CSVConfig, reader: Reader, header: Columns)
   extends LineReader(config, reader) {
 

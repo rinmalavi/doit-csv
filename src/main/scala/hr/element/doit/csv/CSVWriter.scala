@@ -5,12 +5,12 @@ import scala.annotation.tailrec
 import java.io._
 
 class CSVWriter(val config: CSVConfig, writer: Writer) {
-  val quoteLen = config.quotes.length
+  private val quoteLen = config.quotes.length
 
-  val escapes =
+  private val escapes =
     Seq(config.delimiter, config.quotes, config.newLine)
 
-  def quoteIfNecessary(l: String) {
+  private def quoteIfNecessary(l: String) {
     if (escapes.exists(l.contains)) {
       writer.write(config.quotes)
       quote(l)
@@ -20,7 +20,7 @@ class CSVWriter(val config: CSVConfig, writer: Writer) {
     }
   }
 
-  def quote(l: String, i: Int = -quoteLen) {
+  private def quote(l: String, i: Int = -quoteLen) {
     val oldValHead = math.max(i, 0)
 
     l.indexOf(config.quotes, i + quoteLen) match {
