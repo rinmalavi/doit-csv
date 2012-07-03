@@ -1,4 +1,6 @@
-target
-bin
-*~
+*.csv
+.cache
+.classpath
+.project
 .settings
+target
