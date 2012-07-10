@@ -41,6 +41,7 @@ class LineReader(config: CSVConfig, reader: Reader) extends IndexedSeq[String] {
     val sliM = SlidingMatcher(config)
 
     val StartMode: SmrMode = (_: Smr) => Watch
+    val NewWordMode: SmrMode = (_: Smr) => Watch
 
     val VerboseMode: SmrMode = {
       _ match {
@@ -76,12 +77,16 @@ class LineReader(config: CSVConfig, reader: Reader) extends IndexedSeq[String] {
     val StupidMode: SmrMode = (_: Smr) => Unexpected
     def conv(curMode: SmrMode, matcher: Smr): SmrMode = {
       (curMode, matcher) match {
-        case (StartMode, Delimiter) => StartMode
+        case (NewWordMode, Delimiter) => NewWordMode
+        case (NewWordMode, Quote) => QuotedMode
+        case (NewWordMode, ReadCh(_)) => VerboseMode
+        case (NewWordMode, Cooldown) => NewWordMode
+        case (StartMode, Delimiter) => NewWordMode
         case (StartMode, Quote) => QuotedMode
         case (StartMode, ReadCh(_)) => VerboseMode
-        case (StartMode, Cooldown) => StartMode
-        case (EscapeMode, Delimiter) => StartMode
-        case (VerboseMode, Delimiter | NewLine) => StartMode
+        case (StartMode, Cooldown) => NewWordMode
+        case (EscapeMode, Delimiter) => NewWordMode
+        case (VerboseMode, Delimiter | NewLine) => NewWordMode
         case (VerboseMode, ReadCh(x)) => VerboseMode
         case (QuotedMode, Quote) => EscapeMode
         case (QuotedMode, Cooldown) => QuotedMode
@@ -97,25 +102,27 @@ class LineReader(config: CSVConfig, reader: Reader) extends IndexedSeq[String] {
 
     def stringMode(mode: SmrMode) = {
       (mode) match {
-        case (StartMode) => "Start mode"
-        case (EscapeMode) => "Escape mode "
-        case (VerboseMode) => "Verbrose mode"
-        case (QuotedMode) => "Quote mode"
-        case (EndMode) => "End Mode"
-        case _ => "Stupid mode"
+        case (StartMode)    => "Start mode"
+        case (EscapeMode)   => "Escape mode "
+        case (VerboseMode)  => "Verbrose mode"
+        case (QuotedMode)   => "Quote mode"
+        case (EndMode)      => "End Mode"
+        case _              => "Stupid mode"
       }
 
     }
 
     def loop(
       mode: SmrMode,
-      curr: StringBuilder = new StringBuilder()) {
+      curr: StringBuilder = new StringBuilder("")) {
       val read = reader.read()
 //println( "loop: " + curr + " " + stringMode(mode)+" read :"+read.toChar+"| uc"+read+"|")
       if (read == -1) { // End Of File
         if (mode == QuotedMode) sys.error("Malformated CSV, unexpected eof!")
         else if (curr.nonEmpty)
           res += (curr appendAll sliM.flush()).result()
+        else if (mode == NewWordMode)
+          res += ""
         else
           res
       } else {
