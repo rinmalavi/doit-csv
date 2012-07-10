@@ -1,6 +1,0 @@
-@echo off
-
-echo Performing dependency update for all projects ...aoeuao
-eu
-echo Will also create Eclipse .project and .classpath files ...
-aoeuaoall "%~dp0\sbt.bat" --no-jrebel %* update eclipse
