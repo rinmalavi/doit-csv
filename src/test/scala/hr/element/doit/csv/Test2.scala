@@ -124,72 +124,71 @@ pero,marko,"""
 //      } else {}
 //    }
 //  }
-//
-//  scenario("Simple Test with Headers and CyclicMatcher"){
-//        val outFileName = "test1.csv"
-//    val testRange = 566 to 567
-//    val strSize = 20
-//    val numOfQuotes = (i: Int) => i / 70
-//    val header = IndexedSeq("first", "second", "third")
-//    val rowMod = (i: Int) => (i)
-//    val colMod = header.length //(i:Int )  =>(i / 60)
-//
-//    for (i <- testRange) {
-//      val t = new Random(i - 1)
-//      val factory = CSVConfig.
-//      setDelimiter(t.nextString(i / 70)).
-//        setNewLine(t.nextString(i / 60)).
-//        setQuotes(t.nextString(i / 20)).
-//        setEncoding(Charset.forName("utf8"))
-//
-//        val oS= new FileOutputStream(outFileName)
-//        val writer = factory.getWriter(oS)
-//      if (valid(writer.config)) {
-//
-//        writer.write(header.toArray)
-//        val rand = new Random(i)
-//        for (j <- 1 to rowMod(i)) {
-//          val str = for (k <- 1 to colMod)
-//            yield getRandStr(rand, numOfQuotes(i), writer.config.quotes, strSize)
-//          val arr = str.toArray
-//          writer.write(arr)
-//        }
-//        oS.close()
-//        val time = System.currentTimeMillis()
-//
-//        val r = new Random(i)
-//        val f = new File(outFileName)
-//      info("Starting test :" + i + ", File size: " + f.length)
-//        val reader = factory.getReaderWithHeaders(new FileInputStream(f))
-//        reader.foreach{x =>
-//                  //println("y0 R")
-//            x.foreach {
-//              //println("y0")
-//                _ should equal(
-//                    getRandStr(r, numOfQuotes(i), writer.config.quotes, strSize))
-//          }
-//        }
-//          info("time: "+(System.currentTimeMillis() - time))
-//      } else {}
-//    }
-//  }
-//  def getRandStr(r: Random, i: Int, quotes: String, strSize: Int) = {
-//    val str = new StringBuilder(
-//      r.nextString(r.nextInt().abs % strSize + 4))
-//    val l = str.length
-//    for (l <- 1 to i) {
-//      str.insert((r.nextInt().abs % l + 3), quotes)
-//    }
-//    str.result
-//  }
-//
-//  def valid(fac: CSVConfig) = {
-//    if (fac.delimiter.contains(fac.quotes) ||
-//      fac.delimiter.contains(fac.newLine) ||
-//      fac.quotes.contains(fac.newLine) ||
-//      fac.quotes.contains(fac.delimiter) ||
-//      fac.newLine.contains(fac.quotes) ||
-//      fac.newLine.contains(fac.delimiter))
-//      false else true
-//  }
+
+  scenario("Simple Test with Headers and CyclicMatcher"){
+        val outFileName = "test1.csv"
+    val testRange = 566 to 567
+    val strSize = 20
+    val numOfQuotes = (i: Int) => i / 70
+    val header = IndexedSeq("first", "second", "third")
+    val rowMod = (i: Int) => (i)
+    val colMod = header.length// (i:Int )  =>(i / 60)
+
+    for (i <- testRange) {
+      val t = new Random(i - 1)
+      val factory = CSVConfig.
+      setDelimiter(t.nextString(i / 70)).
+        setNewLine(t.nextString(i / 60)).
+        setQuotes(t.nextString(i / 20)).
+        setEncoding(Charset.forName("utf8"))
+
+        val oS= new FileOutputStream(outFileName)
+        val writer = factory.getWriter(oS)
+      if (valid(writer.config)) {
+
+        writer.write(header.toArray)
+        val rand = new Random(i)
+        for (j <- 1 to rowMod(i)) {
+          val str = for (k <- 1 to colMod)
+            yield getRandStr(rand, numOfQuotes(i), writer.config.quotes, strSize)
+          val arr = str.toArray
+          writer.write(arr)
+        }
+        oS.close()
+        val time = System.currentTimeMillis()
+
+        val r = new Random(i)
+        val f = new File(outFileName)
+      info("Starting test :" + i + ", File size: " + f.length)
+        val reader = factory.getReaderWithHeaders(new FileInputStream(f))
+        reader.foreach{x =>
+            x.foreach { chineze => 
+            info(chineze)
+                chineze should equal(
+                    getRandStr(r, numOfQuotes(i), writer.config.quotes, strSize))
+          }
+        }
+          info("time: "+(System.currentTimeMillis() - time))
+      } else {}
+    }
+  }
+  def getRandStr(r: Random, i: Int, quotes: String, strSize: Int) = {
+    val str = new StringBuilder(
+      r.nextString(r.nextInt().abs % strSize + 4))
+    val l = str.length
+    for (l <- 1 to i) {
+      str.insert((r.nextInt().abs % l + 3), quotes)
+    }
+    str.result
+  }
+
+  def valid(fac: CSVConfig) = {
+    if (fac.delimiter.contains(fac.quotes) ||
+      fac.delimiter.contains(fac.newLine) ||
+      fac.quotes.contains(fac.newLine) ||
+      fac.quotes.contains(fac.delimiter) ||
+      fac.newLine.contains(fac.quotes) ||
+      fac.newLine.contains(fac.delimiter))
+      false else true
+  }
 }
