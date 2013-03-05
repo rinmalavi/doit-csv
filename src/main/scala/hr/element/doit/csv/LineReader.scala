@@ -109,25 +109,26 @@ class LineReader(config: CSVConfig, reader: Reader) extends IndexedSeq[String] {
         case (EndMode)      => "End Mode"
         case _              => "Stupid mode"
       }
-
     }
 
     def loop(
       mode: SmrMode,
       curr: StringBuilder = new StringBuilder("")) {
       val read = reader.read()
-//println( "loop: " + curr + " " + stringMode(mode)+" read :"+read.toChar+"| uc"+read+"|")
+
+      // println( "loop: " + curr + " " + stringMode(mode)+" read :"+read.toChar+"| uc"+read+"|")
+
       if (read == -1) { // End Of File
         if (mode == QuotedMode) sys.error("Malformated CSV, unexpected eof!")
         else if (curr.nonEmpty)
           res += (curr appendAll sliM.flush()).result()
         else if (mode == NewWordMode)
           res += ""
-        else
-          res
       } else {
         val returnResult = sliM.consume(read.toChar, mode)
-        //println(returnResult.getClass())
+      
+        // println(returnResult.getClass())
+
         if (mode(returnResult) == Unexpected)
           sys.error("Malformated CSV! " + stringMode(mode) + " with " + returnResult.getClass())
         else {

@@ -43,6 +43,5 @@ class CSVWriter(val config: CSVConfig, writer: Writer) {
       writer.write(config.newLine)
       writer.flush()
     }
-    this
   }
 }
