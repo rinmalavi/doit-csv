@@ -2,13 +2,13 @@ organization := "hr.element.doit"
 
 name         := "doit-csv"
 
-version      := "0.1.7"
+version      := "0.1.8-SNAPSHOT"
 
 // ### Build settings ###
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "2.0.M5b" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "2.0.RC1" % "test"
 
-crossScalaVersions := Seq("2.10.1-RC2", "2.9.3", "2.9.2", "2.9.1-1", "2.9.1", "2.9.0-1", "2.9.0")
+crossScalaVersions := Seq("2.10.3", "2.9.3", "2.9.2", "2.9.1-1", "2.9.1", "2.9.0-1", "2.9.0")
 
 scalaVersion <<= crossScalaVersions(_.head)
 
@@ -63,9 +63,9 @@ javacOptions := Seq(
 
 scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "UTF-8", "-optimise")
 
-unmanagedSourceDirectories in Compile <<= (scalaSource in Compile)(_ :: Nil)
+unmanagedSourceDirectories in Compile := (scalaSource in Compile).value  :: Nil
 
-unmanagedSourceDirectories in Test    <<= (scalaSource in Test   )(_ :: Nil)
+unmanagedSourceDirectories in Test    := (scalaSource in Test).value :: Nil
 
 // ### Publishing ###
 
